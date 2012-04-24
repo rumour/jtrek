@@ -1,3 +1,82 @@
 "!http://api.coderwall.com/rumour/endorse.png!":http://coderwall.com/rumour
 
-Establishing a git repository for JTrek
+JavaTrek is licensed under the GNU General Public License.
+To view the license, please refer to the COPYING file.
+
+JavaTrek is based on Chuck L. Peterson's MTrek.
+
+----------------------------------------------------------
+
+JavaTrek is a real time space combat simulator. Controlled via a keyboard through a telnet interface, you can choose from a variety of ships to battle it
+out for gold in a text based 3d environment.
+
+Requirements:
+Java Runtime Environment or SDK 1.6.0 or better.
+MySQL database accessible from the machine running the server.
+
+Running JavaTrek:
+1. Download and install a compatible version of the Java Runtime Environment or SDK.  (See above.)
+2. Create your MySQL database and note it's server, username, password and database name.
+3. Execute the jtrek_tables.sql file inside the MySQL database so that the table structure is created.
+4. Make a copy of "jtrek.properties.blank" and name it "jtrek.properties".  Update the jdbc.url, jdbc.user and jdbc.password fields.  Save the file.
+
+WINDOWS:
+Ensure that the bin/ folder in your Java JRE is in your system path.
+Double click on the "runJTrekWindows.bat" file to start your server.
+
+LINUX:
+Ensure that the java binary is in your path.
+Make sure "startup.sh" is executable.  When completed, execute "./startup.sh" in the directory that you extracted JavaTrek to.
+* We've found that running JavaTrek in a screen is best.  For more information on the screen command, refer to your distro documentation.
+
+OPTIONAL:
+Edit the welcome.txt file to change what a user sees when they connect to your server.
+
+GETTING BOTS RUNNING:
+The bots use a separate player account.
+Log into JavaTrek and create an account with a dummy ship.  Then quit the game. eg. "BotAccount" or similar.
+Switch to the server console and type "show playerids".  This command will list player id numbers and player accounts in the database.  Make a note of which player id is for your bot account.
+Open the "jtrek.properties" file and edit the bot.playerId entry by change the value to the specific account number.  eg. If the id was 5, then the line should read bot.playerId=5.
+Ensure that the respawn time is correct.
+Ensure that bot.maxBots has the correct number of bots that you wish to run.
+Switch to the server console and type "shutdown".
+Restart the server by executing the bat file or script.
+
+CREATING A Q SHIP:
+Q ships are the "administrative" ships of the game.  Basically indestructable.  Powerful weapons.  Infinite cloak.
+Change the field "ship_class" in the "ships" table to "Q".  eg. Execute this query in MySQL in your database.  UPDATE ships SET ship_class="Q" WHERE ship_name="Burninator";
+
+Admiral Commands:  CTRL+A in a Q ship.
+create gold <amount> - Creates an amount of gold.
+create ship debris with gold - Creates some ship debris with 100 gold.
+autofix - Turns AutoFix on.
+show db data [<shipletter>] - Shows some database information for a ship.
+show xyz [<shipletter>] - Shows the coordinates for a ship.
+move to [<shipletter>] - Moves the Q ship to a specific ship.
+change quad [a,b,g,d,o,n] - Choose a quadrant to move to.  eg. change quad [a], change quad [n].
+give all - Gives all inventory items to your ship.
+send msg:<message> - Sends an announcement to all players.
+change name [name] - Temporarily changes your ship name.
+toggle follow - Toggles following your current scan target.
+heal ship [<shipletter>] - Restores shields and removes internal damage on the selected ship.
+energize ship [<shipletter>] - Gives energy to the selected ship.
+bring ship [<shipletter>] - Teleports the selected ship to you.
+tractor beam - Toggle tractor beam for your current scan target.
+spawn bot [<botclass>] - Spawns a bot of the selected class.
+kill ship [<shipletter>] - Destroys selected ship.
+save ship [<shipletter>] - Saves selected ship.
+save all ships - Saves all ships.
+observe ship [<shipletter>] - Observes the selected ships telnet session.
+send quad [<a,b,g,d,o,n>,<shipletter>] - Sends a ship to a quadrant.
+send obj [<objletter>,<shipletter>] - Teleports an object to a ship.
+toggle bots - Toggles spawning of bots for this session.
+set bot max [<count>] - Sets the amount of bots to spawn.
+set bot timeout [<milliseconds>] - Sets the amount of sleep time between bot spawns.
+debug bot [<shipletter>] - Gets some debug information about the bot.
+toggle bot debug [<shipletter>] - Toggles debugging for the specific bot.
+set bot skill [<1-5>,<shipletter>] - Sets the skill level for the specific bot.
+toggle teamplay - Toggles team play on or off.
+set team [0-9,<shipletter>] - Set's the ships team number.  0 = no team.
+toggle thx - Toggle old school THK gold ships.
+resupply ship [<shipletter>] - Restocks the specific ship.
+change class [<class>,<shipletter>] - Change the class of the specific ship to <class>. (Letter of class from login screen.)

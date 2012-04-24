@@ -1,0 +1,7 @@
+JavaTrek, Copyright (C) 2003-2007 Joseph Hopkinson, Jay Ashworth
+JavaTrek comes with ABSOLUTELY NO WARRANTY.  This is free
+software, and you are welcome to redistribute it under certain
+conditions; for details please refer to the COPYING file
+provided with this distribution.
+
+Welcome to JavaTrek!
