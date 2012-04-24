@@ -1,0 +1,49 @@
+#  JavaTrek Properties File - Used for configuration of your JavaTrek server.
+#######################################
+# JDBC Connection Settings
+#
+# jdbc.url is the url for your database.  Usually jdbc:mysql://<server>/<database>
+jdbc.url=
+
+# jdbc.driver should never change.
+jdbc.driver=com.mysql.jdbc.Driver
+
+# jdbc.user is the username for your database.
+jdbc.user=
+
+# jdbc.password is the password for the account.
+jdbc.password=
+
+##########################################
+# Startup options
+#
+# game.port is the port which the server runs on.
+game.port=1701
+
+# data.port is for the raw data port. (experimental)  This allows you to write your own clients.
+data.port=1702
+
+# monitor.port is for the monitor to connect to.  (experimental).
+monitor.port=1710
+
+# game.debug is whether or not to show extra debug messages on the console.
+game.debug=false
+
+
+##########################################
+# Bot options
+#
+# bot.doRespawn is a flag to toggle whether or not bots respawn.
+bot.doRespawn=true
+
+# bot.maxBots is the maximum number of bots to run at any given time.
+bot.maxBots=0
+
+# bot.playerId is the player id for your bot account.  See README for more infomation.
+bot.playerId=1
+
+# bot.respawnTime is the time in seconds it takes for a bot to spawn.
+bot.respawnTime=10
+
+# bot.drawHud will log all bot sessions to a raw file that can then be replayed.
+bot.drawHud=false
