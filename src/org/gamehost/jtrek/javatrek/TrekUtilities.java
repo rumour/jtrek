@@ -36,7 +36,8 @@ public final class TrekUtilities {
     public static TrekShip getShip(String chosenShip, TrekPlayer player) {
         TrekLog.logMessage("Getting ship: " + chosenShip);
         TrekShip newShip = null;
-        String shipLetter = "";
+        String shipLetter;
+
         if (player instanceof TrekBot && player.shipName.equals("borg")) {
             shipLetter = TrekServer.getBotScanLetter();
         } else {
@@ -99,6 +100,10 @@ public final class TrekUtilities {
             newShip = new ShipQ(player, shipLetter);
         }
 
+        if (newShip == null) {
+            throw new IllegalArgumentException("An unsupported ship selection was made");
+        }
+
         newShip.maxImpulseEnergy = newShip.impulseEnergy;
         newShip.maxWarpEnergy = newShip.warpEnergy;
         newShip.cloakBurnt = false;
@@ -118,244 +123,108 @@ public final class TrekUtilities {
     }
 
     public static boolean isObjectShip(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj.type == TrekObject.OBJ_SHIP)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_SHIP;
     }
 
     public static boolean isObjectPulsar(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj.type == TrekObject.OBJ_PULSAR)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_PULSAR;
     }
 
     public static boolean isObjectPlanet(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_PLANET)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_PLANET;
     }
 
     public static boolean isObjectStarbase(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_STARBASE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_STARBASE;
     }
 
     public static boolean isObjectDrone(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_DRONE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_DRONE;
     }
 
     public static boolean isObjectMine(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_MINE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_MINE;
     }
 
     public static boolean isObjectObserverDevice(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_OBSERVERDEVICE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_OBSERVERDEVICE;
     }
 
     public static boolean isObjectTorpedo(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
+        return obj != null && obj.type == TrekObject.OBJ_TORPEDO;
 
-        if (obj.type == TrekObject.OBJ_TORPEDO)
-            return true;
-        else
-            return false;
     }
 
     public static boolean isObjectBuoy(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_BUOY)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_BUOY;
     }
 
     public static boolean isObjectGold(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_GOLD)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_GOLD;
     }
 
     public static boolean isObjectWormhole(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_WORMHOLE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_WORMHOLE;
     }
 
     public static boolean isObjectCorbomite(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_CORBOMITE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_CORBOMITE;
     }
 
     public static boolean isObjectIridium(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_IRIDIUM)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_IRIDIUM;
     }
 
     public static boolean isObjectMagnabuoy(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_MAGNABUOY)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_MAGNABUOY;
     }
 
     public static boolean isObjectNeutron(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_NEUTRON)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_NEUTRON;
     }
 
     public static boolean isObjectShipDebris(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_SHIPDEBRIS)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_SHIPDEBRIS;
     }
 
     public static boolean isObjectStar(TrekObject obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (obj.type == TrekObject.OBJ_STAR)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_STAR;
     }
 
     public static boolean isObjectComet(TrekObject obj) {
-        if (obj == null)
-            return false;
-
-        if (obj.type == TrekObject.OBJ_COMET)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_COMET;
     }
 
     public static boolean isObjectBlackhole(TrekObject obj) {
-        if (obj == null)
-            return false;
-
-        if (obj.type == TrekObject.OBJ_BLACKHOLE)
-            return true;
-        else
-            return false;
+        return obj != null && obj.type == TrekObject.OBJ_BLACKHOLE;
     }
 
     public static boolean isObjectZone(TrekObject obj) {
-        if (obj == null)
-            return false;
-
-        if ((obj.type == TrekObject.OBJ_ASTEROIDBELT) ||
-                (obj.type == TrekObject.OBJ_NEBULA) ||
-                (obj.type == TrekObject.OBJ_ORGANIA) ||
-                (obj.type == TrekObject.OBJ_PULSAR) ||
-                (obj.type == TrekObject.OBJ_QUASAR) ||
-                (obj.type == TrekObject.OBJ_ZONE))
-            return true;
-        else
-            return false;
+        return obj != null &&
+                ((obj.type == TrekObject.OBJ_ASTEROIDBELT) ||
+                 (obj.type == TrekObject.OBJ_NEBULA) ||
+                 (obj.type == TrekObject.OBJ_ORGANIA) ||
+                 (obj.type == TrekObject.OBJ_PULSAR) ||
+                 (obj.type == TrekObject.OBJ_QUASAR) ||
+                 (obj.type == TrekObject.OBJ_ZONE));
     }
 
     public static boolean isGalacticObject(TrekObject obj) {
-        if (obj == null) return false;
+        return obj != null &&
+                (isObjectZone(obj) ||
+                 isObjectPlanet(obj) ||
+                 isObjectStarbase(obj) ||
+                 isObjectWormhole(obj) ||
+                 isObjectStar(obj) ||
+                 isObjectComet(obj) ||
+                 isObjectBlackhole(obj) ||
+                 isObjectObserverDevice(obj));
 
-        if (isObjectZone(obj)) return true;
-        if (isObjectPlanet(obj)) return true;
-        if (isObjectStarbase(obj)) return true;
-        if (isObjectWormhole(obj)) return true;
-        if (isObjectStar(obj)) return true;
-        if (isObjectComet(obj)) return true;
-        if (isObjectBlackhole(obj)) return true;
-        if (isObjectObserverDevice(obj)) return true;
-
-        return false;
     }
 
     public static boolean isObjectFlag(TrekObject obj) {
-        if (obj.currentQuadrant.getFlag() != null &&
-                obj.currentQuadrant.getFlag().getFlagObject() == obj) return true;
-        return false;
+        return obj.currentQuadrant.getFlag() != null &&
+                obj.currentQuadrant.getFlag().getFlagObject() == obj;
     }
 
     public static String getTorpedoTypeString(int type) {
@@ -377,7 +246,7 @@ public final class TrekUtilities {
             case TrekShip.TORPEDO_ONEHITWARHEAD:
                 return "warhead";
             default:
-                return "a penis";
+                return "UNDEFINED";
         }
     }
 
@@ -394,55 +263,44 @@ public final class TrekUtilities {
             case TrekShip.PHASER_DISRUPTOR:
                 return "Disruptor";
             default:
-                return "a vagina";
+                return "UNDEFINED";
         }
     }
 
     public static Trek3DPoint parsePoint(String s) {
         // passed string in format: (x,y,z)
         float x, y, z;
-        x = new Float(s.substring(1, s.indexOf(','))).floatValue();
+        x = new Float(s.substring(1, s.indexOf(',')));
         s = s.substring(s.indexOf(',') + 1, s.length());
-        y = new Float(s.substring(0, s.indexOf(','))).floatValue();
-        z = new Float(s.substring(s.indexOf(',') + 1, s.length() - 1)).floatValue();
+        y = new Float(s.substring(0, s.indexOf(',')));
+        z = new Float(s.substring(s.indexOf(',') + 1, s.length() - 1));
 
         return new Trek3DPoint(x, y, z);
     }
 
     public static boolean isValidShipChar(int i) {
-        if (i < 65)
-            return false;
-        if (i >= 65 && i <= 90)
-            return true;
-        if (i >= 91 && i <= 96)
-            return false;
-        if (i >= 97 && i <= 122)
-            return true; //lower-case letters
-        if (i > 122)
-            return false;
+        boolean valid = false;
 
-        return false;
+        if ((i >= 65 && i <= 90) || (i >= 97 && i <= 122)) {
+            valid = true;
+        }
+
+        return valid;
     }
 
     public static boolean isValidObjChar(int i) {
-        if (i >= 48 && i <= 57)
-            return true; // numbers
-        if (i >= 65 && i <= 90)
-            return true; // upper-case letters
-        if (i >= 97 && i <= 122)
-            return true; // lower-case letters
-
-        return false;
+        return (i >= 48 && i <= 57) || (i >= 65 && i <= 90) || (i >= 97 && i <= 122);
     }
 
     public static String format(String start, String end, int chars) {
-        String buffer = "";
+        StringBuilder builder = new StringBuilder(start);
 
         for (int x = 0; x < chars - start.length() - end.length(); x++) {
-            buffer += " ";
+            builder.append(" ");
         }
+        builder.append(end);
 
-        return start + buffer + end;
+        return builder.toString();
     }
 
     public static int returnArrayIndex(int i) {
@@ -476,13 +334,13 @@ public final class TrekUtilities {
         } else if (i >= 36 && i <= 51) {
             i += 97;
         }
-        return (new Character((char) i).toString());
+        return (Character.toString((char) i));
     }
 
     public static String garbledOutboundMsg(String thisMsg) {
         // randomly (1 in 6 chance) replace characters in an outbound message, when sender is influenced by message distorting zone
         Random msgGen = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int x = 0; x < thisMsg.length(); x++) {
             if ((Math.abs(msgGen.nextInt() % 6) == 0) && (x > 4)) {
@@ -498,7 +356,7 @@ public final class TrekUtilities {
     public static String garbledInboundMsg(String thisMsg) {
         // randomly (1 in 6 chance) replace characters in an inboung message when receiving ship is affected by distortion zone
         Random msgGen = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int x = 0; x < thisMsg.length(); x++) {
             if ((Math.abs(msgGen.nextInt() % 6) == 0) && (x > 4)) {

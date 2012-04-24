@@ -46,7 +46,6 @@ public final class TrekServer extends Thread {
     protected static Vector players;
     public static Hashtable quadrants;
     protected static Timer tickTimer;
-    protected static int tickCount = 0;
     protected static Vector deletionTimers;
     protected static long startTime;
     protected static boolean serverShuttingDown = false;
@@ -59,7 +58,6 @@ public final class TrekServer extends Thread {
 
     private static boolean botRespawnEnabled = true;
     private static int maxBotCount = 8;
-    private static int currentBotCount;
     private static boolean logBotHud = false;
     // should be < 3600; time to wait until checking to spawn bots, in seconds
     private static int botRespawnTime = 60;
@@ -100,23 +98,23 @@ public final class TrekServer extends Thread {
         // Open the log.
         TrekLog.openLogFile(debug);
 
-        // initiate an interface to the databse
+        // initiate an interface to the database
         dbInt = new TrekJDBCInterface();
 
         serverMon = new TrekMonitor();
 
         // check properties, override server bot defaults
-        botRespawnEnabled = tpr.getValue("bot.doRespawn").equals("true") ? true : false;
-        maxBotCount = new Integer(tpr.getValue("bot.maxBots")).intValue();
-        botRespawnTime = new Integer(tpr.getValue("bot.respawnTime")).intValue();
-        logBotHud = new Boolean(tpr.getValue("bot.drawHud")).booleanValue();
-        botPlayerId = new Integer(tpr.getValue("bot.playerId")).intValue();
+        botRespawnEnabled = tpr.getValue("bot.doRespawn").equals("true");
+        maxBotCount = new Integer(tpr.getValue("bot.maxBots"));
+        botRespawnTime = new Integer(tpr.getValue("bot.respawnTime"));
+        logBotHud = Boolean.valueOf(tpr.getValue("bot.drawHud"));
+        botPlayerId = new Integer(tpr.getValue("bot.playerId"));
 
         // check properties to enable anonymous play
-        enableAnonymousShips = new Boolean(tpr.getValue("server.anonymousPlay")).booleanValue();
+        enableAnonymousShips = Boolean.valueOf(tpr.getValue("server.anonymousPlay"));
 
         // check to see if thx robot ship should be auto launched
-        autoSpawnThx = new Boolean(tpr.getValue("thx.autoSpawn")).booleanValue();
+        autoSpawnThx = Boolean.valueOf(tpr.getValue("thx.autoSpawn"));
     }
 
     /* (non-Javadoc)
@@ -387,13 +385,13 @@ public final class TrekServer extends Thread {
                     // Capture console commands.
                     if (System.in.available() != 0) {
                         int consoleCharacter = System.in.read();
-                        Character theChar = new Character((char) consoleCharacter);
+                        Character theChar = (char) consoleCharacter;
 
                         System.out.write(theChar.toString().getBytes());
                         System.out.flush();
 
                         if (consoleCharacter != 13 && consoleCharacter != 10) {
-                            consoleCommand += new Character((char) consoleCharacter).toString();
+                            consoleCommand += Character.toString((char) consoleCharacter);
                         } else {
                             doConsoleCommand(consoleCommand);
                         }
@@ -443,7 +441,7 @@ public final class TrekServer extends Thread {
         try {
             if (serverShuttingDown) {
                 OutputStream out = sckClientIn.getOutputStream();
-                out.write(new String("The server is rebooting.  Wait a few minutes and reconnect.").getBytes());
+                out.write("The server is rebooting.  Wait a few minutes and reconnect.".getBytes());
                 out.flush();
                 return;
             }
@@ -482,27 +480,16 @@ public final class TrekServer extends Thread {
                 TrekPlayer activePlayer = (TrekPlayer) players.elementAt(x);
 
                 if (activePlayer.equals(player)) {
-                    //try {
-                    //	players.elementAt(x).notify();
-                    //}
-                    //catch (java.lang.IllegalMonitorStateException e) {
-                    /* ignore */
-                    //}
                     TrekLog.logMessage("Removed " + player.shipName + " from game.");
                     players.removeElementAt(x);
-
                 }
             }
-
-
         } catch (ArrayIndexOutOfBoundsException e) {
-            return;
+            // nothing
         } catch (Exception f) {
             TrekLog.logException(f);
         }
-
-        return;
-    } //End rmv()
+    }
 
     /**
      * Adds a player to the server.
@@ -514,7 +501,7 @@ public final class TrekServer extends Thread {
         try {
             if (serverShuttingDown) {
                 OutputStream out = sckClientIn.getOutputStream();
-                out.write(new String("<error>The server is rebooting.  Wait a few minutes and reconnect.</error>").getBytes());
+                out.write("<error>The server is rebooting.  Wait a few minutes and reconnect.</error>".getBytes());
                 out.flush();
                 return;
             }
@@ -537,7 +524,7 @@ public final class TrekServer extends Thread {
         try {
             if (serverShuttingDown) {
                 OutputStream out = sckClientIn.getOutputStream();
-                out.write(new String("The server is rebooting.  Wait a few minutes and reconnect.").getBytes());
+                out.write("The server is rebooting.  Wait a few minutes and reconnect.".getBytes());
                 out.flush();
                 return;
             }
@@ -556,7 +543,7 @@ public final class TrekServer extends Thread {
      */
     protected static void sendMsgToAllPlayers(String thisMessage, TrekObject sender, boolean beep, boolean sendReceivingMessage) {
 
-        if (sender instanceof TrekShip) {
+        if (TrekUtilities.isObjectShip(sender)) {
             serverMon.addToOutputBuffer("MSG:(" + sender.name + ") " + thisMessage + "\r");
         } else {
             serverMon.addToOutputBuffer("MSG:(SB Distress) " + thisMessage + "\r");
@@ -644,19 +631,15 @@ public final class TrekServer extends Thread {
         }
     }
 
-
     public static void sendMsgToAllPlayersInQuadrant(String message, TrekObject sender, TrekQuadrant quad, boolean beep, boolean sendRecMsg) {
         Vector allShips = quad.getAllShips();
-        for (Iterator iterator = allShips.iterator(); iterator.hasNext(); ) {
-            TrekShip curShip = (TrekShip) iterator.next();
+        for (Object ship : allShips) {
+            TrekShip curShip = (TrekShip) ship;
             sendMsgToPlayer(curShip.scanLetter, message, sender, beep, sendRecMsg);
         }
-
     }
 
-
     protected static void sendAnnouncement(String thisMessage, boolean beep) {
-
         serverMon.addToOutputBuffer("MSG:(Announce) " + thisMessage + "\r");
 
         String actualMessage = "";
@@ -751,7 +734,7 @@ public final class TrekServer extends Thread {
                 if (sendReceivingMessage)
                     activePlayer.hud.sendTopMessage(receiveMessage, 4);
 
-                if (activePlayer != null && activePlayer.state == TrekPlayer.WAIT_PLAYING) {
+                if (activePlayer.state == TrekPlayer.WAIT_PLAYING) {
                     if (!activePlayer.ship.scanLetter.equals(sender.scanLetter) && activePlayer.ship.currentQuadrant == sender.currentQuadrant) {
                         activePlayer.ship.updateMsgPoint(sender.point);
                     }
@@ -773,10 +756,6 @@ public final class TrekServer extends Thread {
                     activePlayer.hud.sendTopMessage(receiveMessage, 4);
             }
         }
-
-        if (sender == null) {
-
-        }
     }
 
     protected static void sendMsgToTeam(String thisMessage, TrekShip sender, boolean beep, boolean sendReceivingMessage) {
@@ -790,19 +769,17 @@ public final class TrekServer extends Thread {
             actualMessage += "\007";
 
         if (TrekUtilities.isObjectShip(sender)) {
-            TrekShip messagingShip = (TrekShip) sender;
-
             // Log the message, because we are nosey.
-            TrekLog.logTextMessage("Team: (" + messagingShip.scanLetter + "): " + messagingShip.name + ": " + thisMessage);
+            TrekLog.logTextMessage("Team: (" + sender.scanLetter + "): " + sender.name + ": " + thisMessage);
             serverMon.addToAdminOutputBuffer("MSG:(Team " + sender.parent.teamNumber + ") " + thisMessage + "\r");
 
-            messagingShip.parent.messageSendCount++;
-            if (messagingShip.nebulaTarget != null) {
+            sender.parent.messageSendCount++;
+            if (sender.nebulaTarget != null) {
                 //garble outbound message
                 thisMessage = TrekUtilities.garbledOutboundMsg(thisMessage);
             }
 
-            if (messagingShip.parent.messageSendCount > 3 && messagingShip.parent.messageSendTimeout != 0) {
+            if (sender.parent.messageSendCount > 3 && sender.parent.messageSendTimeout != 0) {
                 //	messaged too frequently, time to fry the radio transmitter
                 if (thisMessage.length() > 65) {
                     thisMessage = thisMessage.substring(0, 64); // truncate to append burn-out message
@@ -842,7 +819,7 @@ public final class TrekServer extends Thread {
                 if (sendReceivingMessage)
                     activePlayer.hud.sendTopMessage(receiveMessage, 4);
 
-                if (activePlayer != null && activePlayer.state == TrekPlayer.WAIT_PLAYING) {
+                if (activePlayer.state == TrekPlayer.WAIT_PLAYING) {
                     if (!activePlayer.ship.scanLetter.equals(sender.scanLetter)) {
                         activePlayer.ship.updateMsgPoint(sender.point);
                     }
@@ -866,7 +843,6 @@ public final class TrekServer extends Thread {
         }
     }
 
-
     public static void sendMsgToPlayer(String thisShip, String thisMessage, TrekObject sender, boolean beep, boolean sendReceivingMessage) {
         String actualMessage = "";
         String receiveMessage = "";
@@ -888,9 +864,6 @@ public final class TrekServer extends Thread {
             TrekPlayer activePlayer = (TrekPlayer) players.elementAt(x);
 
             if (activePlayer.state != TrekPlayer.WAIT_PLAYING)
-                continue;
-
-            if (activePlayer == null)
                 continue;
 
             if (activePlayer.ship == null)
@@ -950,8 +923,6 @@ public final class TrekServer extends Thread {
                     }
 
                 }
-
-                return;
             } else {
                 if (activePlayer.ship.scanLetter.equals(thisShip)) {
                     if (activePlayer.ship.nebulaTarget != null) {
@@ -970,7 +941,7 @@ public final class TrekServer extends Thread {
     protected static void sendMsgToClosestPlayer(String thisMessage, TrekPlayer sender, boolean beep, boolean sendReceivingMessage) {
         String preGarbledMsg = thisMessage;
         String actualMessage = "";
-        String receiveMessage = "";
+        String receiveMessage;
         receiveMessage = "Receiving subspace transmission from " + sender.ship.name + " ...";
 
         // Log the message, because we are nosey.
@@ -1117,7 +1088,7 @@ public final class TrekServer extends Thread {
 
             if (player.ship != null) {
                 for (int x = 0; x < letters.length; x++) {
-                    if (player.ship.scanLetter.equals(new Character(letters[x]).toString())) {
+                    if (player.ship.scanLetter.equals(Character.toString(letters[x]))) {
                         letters[x] = '\0';
                         break;
                     }
@@ -1126,10 +1097,10 @@ public final class TrekServer extends Thread {
         }
 
         // Get the first available scanletter from the letters array.
-        for (int x = 0; x < letters.length; x++) {
-            if (letters[x] != '\0') {
-                TrekLog.logMessage("Available ship scan letter found: " + letters[x]);
-                return Character.toString(letters[x]);
+        for (char letter : letters) {
+            if (letter != '\0') {
+                TrekLog.logMessage("Available ship scan letter found: " + letter);
+                return Character.toString(letter);
             }
         }
 
@@ -1254,22 +1225,19 @@ public final class TrekServer extends Thread {
     }
 
     public static void launchBots() {
-
         if (botRespawnEnabled) {
-
             Random gen = new Random();
 
-            //for (int i = getCurrentBotPlayerCount(); i < maxBotCount; i++) {
             if (getCurrentBotPlayerCount() < maxBotCount) {
                 TrekLog.logMessage("Launching bot.");
 
-                String botShipName = "";
+                String botShipName;
 
                 // TODO: determine whether to start a new ship or unsave an existing one here
                 // for now; choose a new ship each time, cycle through names until a non-allocated name is selected
                 boolean shipExists = false;
 
-                boolean doNameLoop = true;
+                boolean doNameLoop;
                 do {
                     botShipName = BotPlayer.nameChoices[Math.abs(gen.nextInt() % BotPlayer.nameChoices.length)];
                     // check to see if name already is saved
@@ -1411,7 +1379,6 @@ public final class TrekServer extends Thread {
                             }
                     }
 
-
                     try {
                         String botString = "org.gamehost.jtrek.javatrek.bot." + botStr;
                         TrekBot botPlayer;
@@ -1483,7 +1450,6 @@ public final class TrekServer extends Thread {
             for (int count = 0; count < players.size(); count++) {
                 TrekPlayer curPlayer = (TrekPlayer) players.elementAt(count);
                 if (curPlayer.getCurrentStateString().equalsIgnoreCase("** unknown")) {
-                    //curPlayer.handler.interrupt();
                     System.out.println("Trying to remove player on socket: " + curPlayer.socket.getRemoteSocketAddress().toString() + " name: " + curPlayer.shipName);
                     removePlayer(curPlayer);
                     removeAttempts++;
@@ -1510,7 +1476,6 @@ public final class TrekServer extends Thread {
                 removeUnknown();
                 return;
             }
-
 
             if (thisCommand.equalsIgnoreCase("shutdown")) {
                 TrekLog.logMessage("Shutting down server...");
@@ -1577,7 +1542,7 @@ public final class TrekServer extends Thread {
     }
 
     protected static TrekQuadrant getQuadrantByName(String quadName) {
-        TrekQuadrant returnValue = null;
+        TrekQuadrant returnValue;
         returnValue = (TrekQuadrant) quadrants.get(quadName);
 
         return returnValue;
@@ -1597,7 +1562,7 @@ public final class TrekServer extends Thread {
 
     // returns the number of 'BotPlayer's on the server
     protected static int getCurrentBotPlayerCount() {
-        currentBotCount = 0;
+        int currentBotCount = 0;
         for (int x = 0; x < players.size(); x++) {
             TrekPlayer activePlayer = (TrekPlayer) players.elementAt(x);
             if (activePlayer == null)
@@ -1656,7 +1621,7 @@ public final class TrekServer extends Thread {
     }
 
     public static String getBotScanLetter() {
-        TrekLog.logMessage("Getting bot scanletter...");
+        TrekLog.logMessage("Getting bot scan letter...");
 
         // we want that darn borg to start at 'A'
         char[] letters = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
@@ -1672,7 +1637,7 @@ public final class TrekServer extends Thread {
 
             if (player.ship != null) {
                 for (int x = 0; x < letters.length; x++) {
-                    if (player.ship.scanLetter.equals(new Character(letters[x]).toString())) {
+                    if (player.ship.scanLetter.equals(Character.toString(letters[x]))) {
                         letters[x] = '\0';
                         break;
                     }
@@ -1680,11 +1645,11 @@ public final class TrekServer extends Thread {
             }
         }
 
-        // Get the first available scanletter from the letters array.
-        for (int x = 0; x < letters.length; x++) {
-            if (letters[x] != '\0') {
-                TrekLog.logMessage("Available ship scan letter found: " + letters[x]);
-                return Character.toString(letters[x]);
+        // Get the first available scan letter from the letters array.
+        for (char letter : letters) {
+            if (letter != '\0') {
+                TrekLog.logMessage("Available ship scan letter found: " + letter);
+                return Character.toString(letter);
             }
         }
 

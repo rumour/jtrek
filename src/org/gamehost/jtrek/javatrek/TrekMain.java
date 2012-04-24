@@ -37,15 +37,12 @@ public final class TrekMain {
     protected static int monPort;
     protected static TrekPropertyReader tpr = TrekPropertyReader.getInstance();
 
-    public TrekMain() {
-    }
-
     public static void main(String args[]) {
         // get port from properties file
         try {
-            port = new Integer(tpr.getValue("game.port")).intValue();
-            rawPort = new Integer(tpr.getValue("data.port")).intValue();
-            monPort = new Integer(tpr.getValue("monitor.port")).intValue();
+            port = new Integer(tpr.getValue("game.port"));
+            rawPort = new Integer(tpr.getValue("data.port"));
+            monPort = new Integer(tpr.getValue("monitor.port"));
         } catch (Exception e) {
             showUsage();
         }
@@ -101,7 +98,7 @@ public final class TrekMain {
                     // nothing
                 }
             }
-            while (true); // infinite loop accepting connections for ever
+            while (true); // infinite loop accepting connections forever
         } catch (BindException be) {
             System.out.println("There was an error binding to port " + port + ".  Port already in use.");
         } catch (Exception e) {
