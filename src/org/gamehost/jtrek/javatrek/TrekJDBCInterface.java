@@ -26,7 +26,7 @@ import java.util.*;
 
 /**
  * TrekJDBCInterface provides the interface between the JTrek server and the back-end database.
- * It provides for loading and saving ship data, verifying passwords match, and checking for ship/player existance.
+ * It provides for loading and saving ship data, verifying passwords match, and checking for ship/player existence.
  * Has methods available for retrieving top scores overall and by ship class with various sort options.
  *
  * @author Jay Ashworth
@@ -45,13 +45,12 @@ public class TrekJDBCInterface {
 
     // order by options for score lists
     public static final String ORDER_BY_GOLD = "ship_gold";
-    public static final String ORDER_BY_DMGGVN = "ship_damagegiven";
-    public static final String ORDER_BY_DMGRCVD = "ship_damagereceived";
-    public static final String ORDER_BY_BONUS = "ship_bonus";
+//    public static final String ORDER_BY_DMGGVN = "ship_damagegiven";
+//    public static final String ORDER_BY_DMGRCVD = "ship_damagereceived";
+//    public static final String ORDER_BY_BONUS = "ship_bonus";
 
 
     public TrekJDBCInterface() {
-
         try { // load the JDBC driver
             Class.forName(jdbcDriver).newInstance();
         } catch (Exception e) {
@@ -64,10 +63,6 @@ public class TrekJDBCInterface {
         // establish connection
         try {
             myCon = DriverManager.getConnection(jdbcURL, jdbcUser, jdbcPwd);
-            /*			DatabaseMetaData dbmd = myCon.getMetaData();
-                           TrekLog.logMessage(	"DBMS: " + dbmd.getDatabaseProductName()  + ", " + dbmd.getDatabaseProductVersion() );
-                           TrekLog.logMessage(	"Driver: " + dbmd.getDriverName()  + ", " + dbmd.getDriverVersion() );
-               */
         } catch (SQLException SQLe) {
             TrekLog.logError("*** ERROR ***   Problems connecting to " + jdbcURL + ": as " + jdbcUser + "/" + jdbcPwd);
             TrekLog.logError("SQL State: " + SQLe.getSQLState());
@@ -80,7 +75,6 @@ public class TrekJDBCInterface {
                     TrekLog.logException(e);
                 }
             }
-            return;
         }
     }
 
@@ -231,7 +225,7 @@ public class TrekJDBCInterface {
     // return true if password parameter matches that stored in the player record
     public boolean doesShipPasswordMatch(String shipName, String typedPwd) {
         boolean returnFlag = false;
-        String storedPwd = "";
+        String storedPwd;
         try {
             PreparedStatement getShipPasswordStmt =
                     myCon.prepareStatement(
@@ -281,7 +275,7 @@ public class TrekJDBCInterface {
 
     public boolean doesPlayerPasswordMatch(String playerName, String typedPwd) {
         boolean returnFlag = false;
-        String storedPwd = "";
+        String storedPwd;
         try {
             PreparedStatement getPlayerPasswordStmt =
                     myCon.prepareStatement(
@@ -430,11 +424,11 @@ public class TrekJDBCInterface {
             writeNewShipStmt.setInt(74, ship.parent.playerOptions.getOption(TrekPlayerOptions.OPTION_UNKNOWN));
             writeNewShipStmt.setInt(75, ship.parent.playerOptions.getOption(TrekPlayerOptions.OPTION_DAMAGEREPORT));
             writeNewShipStmt.setInt(76, ship.parent.playerOptions.getOption(TrekPlayerOptions.OPTION_OBJECTRANGE));
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (Enumeration e = ship.parent.macros.keys(); e.hasMoreElements(); ) {
                 String key = (String) e.nextElement();
                 String macro = (String) ship.parent.macros.get(key);
-                sb.append("macro=" + key + "~" + macro + "\n\r");
+                sb.append("macro=").append(key).append("~").append(macro).append("\n\r");
             }
             writeNewShipStmt.setBytes(77, sb.toString().getBytes());
             writeNewShipStmt.setBoolean(78, ship.dbShipAlive);
@@ -557,11 +551,11 @@ public class TrekJDBCInterface {
             writeUpdatedShipStmt.setInt(66, ship.parent.playerOptions.getOption(TrekPlayerOptions.OPTION_UNKNOWN));
             writeUpdatedShipStmt.setInt(67, ship.parent.playerOptions.getOption(TrekPlayerOptions.OPTION_DAMAGEREPORT));
             writeUpdatedShipStmt.setInt(68, ship.parent.playerOptions.getOption(TrekPlayerOptions.OPTION_OBJECTRANGE));
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (Enumeration e = ship.parent.macros.keys(); e.hasMoreElements(); ) {
                 String key = (String) e.nextElement();
                 String macro = (String) ship.parent.macros.get(key);
-                sb.append("macro=" + key + "~" + macro + "\n\r");
+                sb.append("macro=").append(key).append("~").append(macro).append("\n\r");
             }
             writeUpdatedShipStmt.setBytes(69, sb.toString().getBytes());
             writeUpdatedShipStmt.setBoolean(70, ship.dbShipAlive);
@@ -637,8 +631,7 @@ public class TrekJDBCInterface {
                 player.ship.damage = rs.getInt("ship_damage");
                 // if ship brokesave, restore it at 'saved' point
                 if (breakSave) {
-                    Trek3DPoint bsPoint = TrekUtilities.parsePoint(rs.getString("ship_xyz"));
-                    player.ship.point = bsPoint;
+                    player.ship.point = TrekUtilities.parsePoint(rs.getString("ship_xyz"));
                     player.ship.vector = new Trek3DVector(0, 0, 1);
                 }
                 // need to set heading based on stored pitch/yaw values
@@ -689,14 +682,14 @@ public class TrekJDBCInterface {
                 player.ship.secondsPlayed = rs.getInt("ship_secondsplayed");
                 player.ship.dateLaunched = rs.getTimestamp("ship_datelaunched").getTime();
                 player.ship.lastLogin = rs.getTimestamp("ship_lastlogin").getTime();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_BEEP] = new Integer(rs.getInt("ship_option_beep")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_ROSTER] = new Integer(rs.getInt("ship_option_roster")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_RANGEUPDATE] = new Integer(rs.getInt("ship_option_range")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_BEARINGUPDATE] = new Integer(rs.getInt("ship_option_bearing")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_XYZUPDATE] = new Integer(rs.getInt("ship_option_xyz")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_UNKNOWN] = new Integer(rs.getInt("ship_option_unknown")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_DAMAGEREPORT] = new Integer(rs.getInt("ship_option_damagereports")).intValue();
-                player.playerOptions.options[TrekPlayerOptions.OPTION_OBJECTRANGE] = new Integer(rs.getInt("ship_option_objects")).intValue();
+                player.playerOptions.options[TrekPlayerOptions.OPTION_BEEP] = rs.getInt("ship_option_beep");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_ROSTER] = rs.getInt("ship_option_roster");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_RANGEUPDATE] = rs.getInt("ship_option_range");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_BEARINGUPDATE] = rs.getInt("ship_option_bearing");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_XYZUPDATE] = rs.getInt("ship_option_xyz");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_UNKNOWN] = rs.getInt("ship_option_unknown");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_DAMAGEREPORT] = rs.getInt("ship_option_damagereports");
+                player.playerOptions.options[TrekPlayerOptions.OPTION_OBJECTRANGE] = rs.getInt("ship_option_objects");
                 String[] keymaps = new String(rs.getBytes("ship_macros")).split("\n\r");
                 System.out.println("Ship " + player.shipName + " has " + keymaps.length + " stored keymaps.");
                 if (keymaps.length != 0) { // ship has stored keymaps
@@ -705,7 +698,7 @@ public class TrekJDBCInterface {
                     String keyToMap;
                     String keyToMapFunction;
                     for (int x = 0; x < keymaps.length; x++) {
-                        if (keymaps[x].indexOf("macro=") == -1)
+                        if (!keymaps[x].contains("macro="))
                             break;
                         //System.out.println("Loading keymap " + x);
                         keymaps[x] = keymaps[x].substring(keymaps[x].indexOf("=") + 1, keymaps[x].length());
@@ -793,7 +786,7 @@ public class TrekJDBCInterface {
                 if (dockLetter.equals("coord")) {
                     score.append("?");
                 } else {
-                    String tmpQuad = new String(rs.getString("ship_quadrant"));
+                    String tmpQuad = rs.getString("ship_quadrant");
                     if (tmpQuad.equals("Beta Quadrant")) {
                         if (dockLetter.equals("0")) {
                             score.append("2");
@@ -871,7 +864,7 @@ public class TrekJDBCInterface {
                 if (dockLetter.equals("coord")) {
                     score.append("?");
                 } else {
-                    String tmpQuad = new String(rs.getString("ship_quadrant"));
+                    String tmpQuad = rs.getString("ship_quadrant");
                     if (tmpQuad.equals("Beta Quadrant")) {
                         if (dockLetter.equals("0")) {
                             score.append("2");
@@ -947,7 +940,7 @@ public class TrekJDBCInterface {
                 if (dockLetter.equals("coord")) {
                     score.append("?");
                 } else {
-                    String tmpQuad = new String(rs.getString("ship_quadrant"));
+                    String tmpQuad = rs.getString("ship_quadrant");
                     if (tmpQuad.equals("Beta Quadrant")) {
                         if (dockLetter.equals("0")) {
                             score.append("2");
@@ -1059,7 +1052,7 @@ public class TrekJDBCInterface {
                     String keyToMap;
                     String keyToMapFunction;
                     for (int x = 0; x < keymaps.length; x++) {
-                        if (keymaps[x].indexOf("macro=") == -1)
+                        if (!keymaps[x].contains("macro="))
                             break;
                         keymaps[x] = keymaps[x].substring(keymaps[x].indexOf("=") + 1, keymaps[x].length());
                         t = new StringTokenizer(keymaps[x], "~");
@@ -1154,7 +1147,7 @@ public class TrekJDBCInterface {
             while (attckrRS.next()) {
                 int curShip = attckrRS.getInt("ship_id");
                 if (doesShipExist(curShip))
-                    returnValue.put(new Integer(curShip).toString(), new Integer(1000));
+                    returnValue.put(Integer.toString(curShip), 1000);
                 else
                     removeEnemy(objName, curShip);
             }
