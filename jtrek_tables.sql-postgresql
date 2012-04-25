@@ -1,0 +1,332 @@
+CREATE TABLE ceasefire (
+  object_name text NOT NULL DEFAULT '',
+  ship_id integer NOT NULL DEFAULT 0
+);
+
+ALTER TABLE ceasefire
+  OWNER TO postgres;
+
+CREATE SEQUENCE connection_seq;
+
+CREATE TABLE connections (
+  connection_id bigint NOT NULL DEFAULT nextval('connection_seq'),
+  player_id integer NOT NULL DEFAULT 0,
+  ship_id integer NOT NULL DEFAULT 0,
+  connection_ip text NOT NULL DEFAULT '',
+  connection_start timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  connection_end timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  CONSTRAINT pkconnections_connectionid PRIMARY KEY (connection_id)
+);
+
+ALTER TABLE connections
+  OWNER TO postgres;
+
+CREATE INDEX connections_playerid
+  ON connections
+  USING btree (player_id);
+
+CREATE INDEX connections_playerid_shipid
+ ON connections
+ USING btree (player_id, ship_id);
+ 
+CREATE SEQUENCE ctfships_seq;
+
+CREATE TABLE ctfships (
+  ship_id integer NOT NULL DEFAULT nextval('ctfships_seq'),
+  player_id integer NOT NULL DEFAULT 0,
+  ship_alive smallint NOT NULL DEFAULT 1,
+  ship_preservePwd timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  ship_name text NOT NULL DEFAULT '',
+  ship_class text NOT NULL DEFAULT '',
+  ship_quadrant text NOT NULL DEFAULT '',
+  ship_docktarget text NOT NULL DEFAULT '',
+  ship_transwarp smallint NOT NULL DEFAULT 0,
+  ship_xmitter smallint NOT NULL DEFAULT 0,
+  ship_shields smallint NOT NULL DEFAULT 0,
+  ship_raisingshields smallint NOT NULL DEFAULT 0,
+  ship_warpenused integer NOT NULL DEFAULT 0,
+  ship_lifesupportfailing smallint NOT NULL DEFAULT 0,
+  ship_docked smallint NOT NULL DEFAULT 0,
+  ship_currentcrystalcount smallint NOT NULL DEFAULT 0,
+  ship_damagecontrol smallint NOT NULL DEFAULT 0,
+  ship_warpenergy smallint NOT NULL DEFAULT 0,
+  ship_impulseenergy smallint NOT NULL DEFAULT 0,
+  ship_lifesupport smallint NOT NULL DEFAULT 0,
+  ship_antimatter smallint NOT NULL DEFAULT 0,
+  ship_damage smallint NOT NULL DEFAULT 0,
+  ship_pitch smallint NOT NULL DEFAULT 0,
+  ship_yaw smallint NOT NULL DEFAULT 0,
+  ship_xyz text NOT NULL DEFAULT '',
+  ship_torpedoes smallint NOT NULL DEFAULT 0,
+  ship_torpedotype smallint NOT NULL DEFAULT 0,
+  ship_torpedocount smallint NOT NULL DEFAULT 0,
+  ship_torpedowarpspeed smallint NOT NULL DEFAULT 0,
+  ship_torpedowarpspeedauto smallint NOT NULL DEFAULT 0,
+  ship_torpedofiretimeout smallint NOT NULL DEFAULT 0,
+  ship_phasers smallint NOT NULL DEFAULT 0,
+  ship_phasertype smallint NOT NULL DEFAULT 0,
+  ship_phaserfiretype smallint NOT NULL DEFAULT 0,
+  ship_phaserfiretimeout smallint NOT NULL DEFAULT 0,
+  ship_phaserenergyreturned smallint NOT NULL DEFAULT 0,
+  ship_dronecount smallint NOT NULL DEFAULT 0,
+  ship_dronefiretimeout smallint NOT NULL DEFAULT 0,
+  ship_minecount smallint NOT NULL DEFAULT 0,
+  ship_minefiretimeout smallint NOT NULL DEFAULT 0,
+  ship_cloak smallint NOT NULL DEFAULT 0,
+  ship_cloaktimecurrent smallint NOT NULL DEFAULT 0,
+  ship_cloakburnt smallint NOT NULL DEFAULT 0,
+  ship_cloakfiretimeout smallint NOT NULL DEFAULT 0,
+  ship_ramtimeout smallint NOT NULL DEFAULT 0,
+  ship_buoytimeout smallint NOT NULL DEFAULT 0,
+  ship_corbomite smallint NOT NULL DEFAULT 0,
+  ship_corbomitetimeout smallint NOT NULL DEFAULT 0,
+  ship_iridium smallint NOT NULL DEFAULT 0,
+  ship_magnabuoy smallint NOT NULL DEFAULT 0,
+  ship_magnabuoytimeout smallint NOT NULL DEFAULT 0,
+  ship_neutron smallint NOT NULL DEFAULT 0,
+  ship_gold integer NOT NULL DEFAULT 0,
+  ship_damagegiven integer NOT NULL DEFAULT 0,
+  ship_temp_dmggvn integer NOT NULL DEFAULT 0,
+  ship_damagereceived integer NOT NULL DEFAULT 0,
+  ship_bonus integer NOT NULL DEFAULT 0,
+  ship_temp_bonus integer NOT NULL DEFAULT 0,
+  ship_breaksaves smallint NOT NULL DEFAULT 0,
+  ship_conflicts integer NOT NULL DEFAULT 0,
+  ship_unitstraveled double precision NOT NULL DEFAULT 0,
+  ship_torpsfired integer NOT NULL DEFAULT 0,
+  ship_minesdropped integer NOT NULL DEFAULT 0,
+  ship_dronesfired integer NOT NULL DEFAULT 0,
+  ship_secondsplayed integer NOT NULL DEFAULT 0,
+  ship_datelaunched timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  ship_lastlogin timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  ship_option_beep smallint NOT NULL DEFAULT 0,
+  ship_option_roster smallint NOT NULL DEFAULT 0,
+  ship_option_range smallint NOT NULL DEFAULT 0,
+  ship_option_bearing smallint NOT NULL DEFAULT 0,
+  ship_option_xyz smallint NOT NULL DEFAULT 0,
+  ship_option_unknown smallint NOT NULL DEFAULT 0,
+  ship_option_damagereports smallint NOT NULL DEFAULT 0,
+  ship_option_objects smallint NOT NULL DEFAULT 0,
+  ship_macros bytea,
+  CONSTRAINT pkctfships_shipid PRIMARY KEY (ship_id)
+);
+
+ALTER TABLE ctfships
+  OWNER TO postgres;
+
+CREATE INDEX ctfships_shipclass_shipgold
+ ON ctfships
+ USING btree (ship_class, ship_gold);
+
+CREATE INDEX ctfships_shipdamagereceived
+ ON ctfships
+ USING btree (ship_damagereceived);
+
+CREATE INDEX ctfships_shipconflicts
+ ON ctfships
+ USING btree (ship_conflicts);
+
+CREATE INDEX ctfships_shipname
+ ON ctfships
+ USING btree (ship_name);
+
+CREATE INDEX ctfships_shipdamagegiven
+ ON ctfships
+ USING btree (ship_damagegiven);
+
+CREATE INDEX ctfships_playerid
+ ON ctfships
+ USING btree (player_id);
+
+CREATE INDEX ctfships_shipbonus
+ ON ctfships
+ USING btree (ship_bonus);
+
+CREATE INDEX ctfships_shipclass_shipbonus
+ ON ctfships
+ USING btree (ship_class, ship_bonus);
+
+CREATE INDEX ctfships_shipclass_shipdamagereceived
+ ON ctfships
+ USING btree (ship_class, ship_damagereceived);
+
+CREATE INDEX ctfships_shipclass_shipdamagegiven
+ ON ctfships
+ USING btree (ship_class, ship_damagegiven);
+
+CREATE INDEX ctfships_shipgold
+ ON ctfships
+ USING btree (ship_gold);
+
+CREATE TABLE keymaps (
+  player_id integer NOT NULL DEFAULT 0,
+  ship_class text NOT NULL DEFAULT '',
+  ship_macros bytea NOT NULL,
+  CONSTRAINT pkkeymaps_playerid PRIMARY KEY (player_id)
+);
+
+ALTER TABLE keymaps
+  OWNER TO postgres;
+  
+CREATE INDEX keymaps_playerid_shipclass
+ ON keymaps
+ USING btree (player_id, ship_class);
+
+CREATE SEQUENCE players_seq;
+
+CREATE TABLE players (
+  player_id integer NOT NULL DEFAULT nextval('players_seq'),
+  player_name text NOT NULL DEFAULT '',
+  player_pwd text NOT NULL DEFAULT '',
+  player_admin smallint NOT NULL DEFAULT 0,
+  player_email text NOT NULL DEFAULT '',
+  player_create_date timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  player_create_ip text NOT NULL DEFAULT '',
+  player_last_login timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  player_restrict_ip smallint NOT NULL DEFAULT 0,
+  player_allowed_ips bytea,
+  player_account_locked smallint NOT NULL DEFAULT 0,
+  player_login_msg bytea,
+  player_anonymous smallint NOT NULL DEFAULT 1,
+  CONSTRAINT pkplayers_playerid PRIMARY KEY (player_id)
+);
+
+ALTER TABLE players
+  OWNER TO postgres;
+  
+CREATE INDEX players_playername
+  ON players
+  USING btree (player_name);
+  
+CREATE SEQUENCE ships_seq;
+
+CREATE TABLE ships (
+  ship_id integer NOT NULL DEFAULT nextval('ships_seq'),
+  player_id integer NOT NULL DEFAULT 0,
+  ship_alive smallint NOT NULL DEFAULT '1',
+  ship_preservePwd timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  ship_name text NOT NULL DEFAULT '',
+  ship_class text NOT NULL DEFAULT '',
+  ship_quadrant text NOT NULL DEFAULT '',
+  ship_docktarget text NOT NULL DEFAULT '',
+  ship_transwarp smallint NOT NULL DEFAULT 0,
+  ship_xmitter smallint NOT NULL DEFAULT 0,
+  ship_shields smallint NOT NULL DEFAULT 0,
+  ship_raisingshields smallint NOT NULL DEFAULT 0,
+  ship_warpenused integer NOT NULL DEFAULT 0,
+  ship_lifesupportfailing smallint NOT NULL DEFAULT 0,
+  ship_docked smallint NOT NULL DEFAULT 0,
+  ship_currentcrystalcount smallint NOT NULL DEFAULT 0,
+  ship_damagecontrol smallint NOT NULL DEFAULT 0,
+  ship_warpenergy smallint NOT NULL DEFAULT 0,
+  ship_impulseenergy smallint NOT NULL DEFAULT 0,
+  ship_lifesupport smallint NOT NULL DEFAULT 0,
+  ship_antimatter smallint NOT NULL DEFAULT 0,
+  ship_damage smallint NOT NULL DEFAULT 0,
+  ship_pitch smallint NOT NULL DEFAULT 0,
+  ship_yaw smallint NOT NULL DEFAULT 0,
+  ship_xyz text NOT NULL DEFAULT '',
+  ship_torpedoes smallint NOT NULL DEFAULT 0,
+  ship_torpedotype smallint NOT NULL DEFAULT 0,
+  ship_torpedocount smallint NOT NULL DEFAULT 0,
+  ship_torpedowarpspeed smallint NOT NULL DEFAULT 0,
+  ship_torpedowarpspeedauto smallint NOT NULL DEFAULT 0,
+  ship_torpedofiretimeout smallint NOT NULL DEFAULT 0,
+  ship_phasers smallint NOT NULL DEFAULT 0,
+  ship_phasertype smallint NOT NULL DEFAULT 0,
+  ship_phaserfiretype smallint NOT NULL DEFAULT 0,
+  ship_phaserfiretimeout smallint NOT NULL DEFAULT 0,
+  ship_phaserenergyreturned smallint NOT NULL DEFAULT 0,
+  ship_dronecount smallint NOT NULL DEFAULT 0,
+  ship_dronefiretimeout smallint NOT NULL DEFAULT 0,
+  ship_minecount smallint NOT NULL DEFAULT 0,
+  ship_minefiretimeout smallint NOT NULL DEFAULT 0,
+  ship_cloak smallint NOT NULL DEFAULT 0,
+  ship_cloaktimecurrent smallint NOT NULL DEFAULT 0,
+  ship_cloakburnt smallint NOT NULL DEFAULT 0,
+  ship_cloakfiretimeout smallint NOT NULL DEFAULT 0,
+  ship_ramtimeout smallint NOT NULL DEFAULT 0,
+  ship_buoytimeout smallint NOT NULL DEFAULT 0,
+  ship_corbomite smallint NOT NULL DEFAULT 0,
+  ship_corbomitetimeout smallint NOT NULL DEFAULT 0,
+  ship_iridium smallint NOT NULL DEFAULT 0,
+  ship_lithium smallint NOT NULL DEFAULT 0,
+  ship_lithiumtimeout smallint NOT NULL DEFAULT 0,
+  ship_magnabuoy smallint NOT NULL DEFAULT 0,
+  ship_magnabuoytimeout smallint NOT NULL DEFAULT 0,
+  ship_neutron smallint NOT NULL DEFAULT 0,
+  ship_seeker smallint NOT NULL DEFAULT 0,
+  ship_seekertimeout smallint NOT NULL DEFAULT 0,
+  ship_gold integer NOT NULL DEFAULT 0,
+  ship_damagegiven integer NOT NULL DEFAULT 0,
+  ship_temp_dmggvn integer NOT NULL DEFAULT 0,
+  ship_damagereceived integer NOT NULL DEFAULT 0,
+  ship_bonus integer NOT NULL DEFAULT 0,
+  ship_temp_bonus integer NOT NULL DEFAULT 0,
+  ship_breaksaves smallint NOT NULL DEFAULT 0,
+  ship_conflicts integer NOT NULL DEFAULT 0,
+  ship_unitstraveled double precision NOT NULL DEFAULT 0,
+  ship_torpsfired integer NOT NULL DEFAULT 0,
+  ship_minesdropped integer NOT NULL DEFAULT 0,
+  ship_dronesfired integer NOT NULL DEFAULT 0,
+  ship_secondsplayed integer NOT NULL DEFAULT 0,
+  ship_datelaunched timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  ship_lastlogin timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
+  ship_option_beep smallint NOT NULL DEFAULT 0,
+  ship_option_roster smallint NOT NULL DEFAULT 0,
+  ship_option_range smallint NOT NULL DEFAULT 0,
+  ship_option_bearing smallint NOT NULL DEFAULT 0,
+  ship_option_xyz smallint NOT NULL DEFAULT 0,
+  ship_option_unknown smallint NOT NULL DEFAULT 0,
+  ship_option_damagereports smallint NOT NULL DEFAULT 0,
+  ship_option_objects smallint NOT NULL DEFAULT 0,
+  ship_macros bytea,
+  CONSTRAINT pkships_shipid PRIMARY KEY (ship_id)
+);
+
+ALTER TABLE ships
+  OWNER TO postgres;
+
+CREATE INDEX ships_shipclass_shipgold
+ ON ships
+ USING btree (ship_class, ship_gold);
+
+CREATE INDEX ships_shipdamagereceived
+ ON ships
+ USING btree (ship_damagereceived);
+
+CREATE INDEX ships_shipconflicts
+ ON ships
+ USING btree (ship_conflicts);
+
+CREATE INDEX ships_shipname
+ ON ships
+ USING btree (ship_name);
+
+CREATE INDEX ships_shipdamagegiven
+ ON ships
+ USING btree (ship_damagegiven);
+
+CREATE INDEX ships_playerid
+ ON ships
+ USING btree (player_id);
+
+CREATE INDEX ships_shipbonus
+ ON ships
+ USING btree (ship_bonus);
+
+CREATE INDEX ships_shipclass_shipbonus
+ ON ships
+ USING btree (ship_class, ship_bonus);
+
+CREATE INDEX ships_shipclass_shipdamagereceived
+ ON ships
+ USING btree (ship_class, ship_damagereceived);
+
+CREATE INDEX ships_shipclass_shipdamagegiven
+ ON ships
+ USING btree (ship_class, ship_damagegiven);
+
+CREATE INDEX ships_shipgold
+ ON ships
+ USING btree (ship_gold);

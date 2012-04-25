@@ -2,11 +2,11 @@
 #######################################
 # JDBC Connection Settings
 #
-# jdbc.url is the url for your database.  Usually jdbc:mysql://<server>/<database>
+# jdbc.url is the url for your database.
 jdbc.url=
 
-# jdbc.driver should never change.
-jdbc.driver=com.mysql.jdbc.Driver
+# jdbc.driver is the driver for your database
+jdbc.driver=
 
 # jdbc.user is the username for your database.
 jdbc.user=
