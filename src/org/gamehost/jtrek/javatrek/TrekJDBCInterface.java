@@ -91,7 +91,7 @@ public class TrekJDBCInterface {
             }
             rs.close();
         } catch (SQLException SQLe) {
-            TrekLog.logError("*** ERROR ***   Exception checking for ship existance: " + shipName);
+            TrekLog.logError("*** ERROR ***   Exception checking for ship existence: " + shipName);
             TrekLog.logException(SQLe);
         }
         return returnFlag;
@@ -431,7 +431,7 @@ public class TrekJDBCInterface {
                 sb.append("macro=").append(key).append("~").append(macro).append("\n\r");
             }
             writeNewShipStmt.setBytes(77, sb.toString().getBytes());
-            writeNewShipStmt.setBoolean(78, ship.dbShipAlive);
+            writeNewShipStmt.setInt(78, ship.dbShipAlive ? 1 : 0);
             saveSuccess = writeNewShipStmt.execute();
         } catch (SQLException SQLe) {
             TrekLog.logError("*** ERROR ***   Problem saving new ship: " + ship.parent.shipName);
@@ -558,7 +558,7 @@ public class TrekJDBCInterface {
                 sb.append("macro=").append(key).append("~").append(macro).append("\n\r");
             }
             writeUpdatedShipStmt.setBytes(69, sb.toString().getBytes());
-            writeUpdatedShipStmt.setBoolean(70, ship.dbShipAlive);
+            writeUpdatedShipStmt.setInt(70, ship.dbShipAlive ? 1 : 0);
             writeUpdatedShipStmt.setBoolean(71, ship.lithium);
             writeUpdatedShipStmt.setInt(72, ship.lithiumTimeout);
             writeUpdatedShipStmt.setBoolean(73, ship.seeker);
