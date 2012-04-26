@@ -1,0 +1,13 @@
+apply plugin: 'groovy'
+
+sourceSets.main.output.classesDir = file("$buildDir/output/classes")
+sourceSets.main.groovy.srcDirs = ['src']
+
+repositories {
+    flatDir { dirs 'lib' }
+}
+
+dependencies {
+    groovy module(':groovy-all:1.8.6')
+    groovy module(':miglayout:3.7.4:swing')
+}
