@@ -312,9 +312,10 @@ public class TrekJDBCInterface {
 
             PreparedStatement writePlayer =
                     myCon.prepareStatement(
-                            "INSERT INTO players (player_name,player_pwd ) VALUES (?, ? )");
+                            "INSERT INTO players (player_name, player_pwd, player_create_date ) VALUES (?, ?, ?)");
             writePlayer.setString(1, playerName);
             writePlayer.setString(2, password);
+            writePlayer.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 
             saveSuccess = writePlayer.execute();
         } catch (Exception e) {

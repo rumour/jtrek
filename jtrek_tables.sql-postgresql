@@ -178,16 +178,16 @@ CREATE TABLE players (
   player_id integer NOT NULL DEFAULT nextval('players_seq'),
   player_name text NOT NULL DEFAULT '',
   player_pwd text NOT NULL DEFAULT '',
-  player_admin smallint NOT NULL DEFAULT 0,
+  player_admin boolean NOT NULL DEFAULT false,
   player_email text NOT NULL DEFAULT '',
   player_create_date timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
   player_create_ip text NOT NULL DEFAULT '',
   player_last_login timestamp without time zone NOT NULL DEFAULT '1000-01-01 00:00:00',
-  player_restrict_ip smallint NOT NULL DEFAULT 0,
+  player_restrict_ip boolean NOT NULL DEFAULT false,
   player_allowed_ips bytea,
-  player_account_locked smallint NOT NULL DEFAULT 0,
+  player_account_locked boolean NOT NULL DEFAULT false,
   player_login_msg bytea,
-  player_anonymous smallint NOT NULL DEFAULT 1,
+  player_anonymous boolean NOT NULL DEFAULT false,
   CONSTRAINT pkplayers_playerid PRIMARY KEY (player_id)
 );
 
