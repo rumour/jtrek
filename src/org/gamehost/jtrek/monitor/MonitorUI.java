@@ -39,22 +39,26 @@ import java.net.UnknownHostException;
 
 public class MonitorUI extends JFrame {
 	private static final long serialVersionUID = 4991642289515404201L;
-	MigLayout layout = new MigLayout();
+
     JMenuBar menuBar = new JMenuBar();
     JScrollPane shipScrollPane = new JScrollPane();
     JScrollPane playerScrollPane = new JScrollPane();
+    JScrollPane messageScrollPane = new JScrollPane();
+
+    JLabel shipCountLabel = new JLabel();
     JLabel shipLabel = new JLabel();
     JLabel playerLabel = new JLabel();
+    JLabel messageLabel = new JLabel();
+
     JList shipList = new JList();
     JList playerList = new JList();
-    JScrollPane messageScrollPane = new JScrollPane();
-    JLabel messageLabel = new JLabel();
+
     JTextArea messageTextArea = new JTextArea();
-    JLabel shipCountLabel = new JLabel();
-    JMenu editMenu = new JMenu();
-    JMenuItem optionsMI = new JMenuItem();
+
     JMenu fileMenu = new JMenu();
+    JMenuItem optionsMI = new JMenuItem();
     JMenuItem exitMI = new JMenuItem();
+
     OptionsDialog dlg;
 
     private String buffer = "";
@@ -80,17 +84,18 @@ public class MonitorUI extends JFrame {
         }
     }
 
-    public void show() {
-        super.show();
+    public void setVisible(boolean show) {
+        super.setVisible(show);
 
         launchOptions();
         doConnect();
     }
 
     private void initUI() throws Exception {
-        JPanel panel = new JPanel(new MigLayout());
-        panel.setMinimumSize(new Dimension(680, 275));
-        getContentPane().setLayout(layout);
+        setLayout(new BorderLayout());
+        setTitle("JTrek Monitor");
+        setResizable(true);
+        setMinimumSize(new Dimension(480, 400));
 
         shipLabel.setText("Active Ships");
         playerLabel.setText("Players Monitoring");
@@ -99,13 +104,26 @@ public class MonitorUI extends JFrame {
         messageTextArea.setToolTipText("");
         messageTextArea.setEditable(false);
         messageTextArea.setText("");
-        messageTextArea.setFont(new java.awt.Font("Courier New", 0, 10));
+        messageTextArea.setFont(new Font("Courier New", 0, 10));
 
         shipCountLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         shipCountLabel.setText("Disconnected");
 
+        JPanel panel = new JPanel(new MigLayout("ins 0, wrap 1", "[fill, grow]", "[][][fill, grow, 0:0][][fill, grow, 0:0][][fill, grow, 0:0]"));
+
+        panel.add(shipCountLabel, "right");
+        panel.add(shipLabel);
+        panel.add(shipScrollPane);
+        panel.add(playerLabel);
+        panel.add(playerScrollPane);
+        panel.add(messageLabel);
+        panel.add(messageScrollPane);
+
+        messageScrollPane.getViewport().add(messageTextArea);
+        playerScrollPane.getViewport().add(playerList);
+        shipScrollPane.getViewport().add(shipList);
+
         fileMenu.setText("File");
-        editMenu.setText("Edit");
         exitMI.setText("Exit");
         optionsMI.setText("Options ...");
 
@@ -127,26 +145,12 @@ public class MonitorUI extends JFrame {
             }
         });
 
-        menuBar.add(fileMenu);
-        //menuBar.add(editMenu);
-        editMenu.add(optionsMI);
+        fileMenu.add(optionsMI);
         fileMenu.add(exitMI);
+        menuBar.add(fileMenu);
 
-        getContentPane().add(menuBar);
-        this.getContentPane().add(shipCountLabel);
-        this.getContentPane().add(shipLabel);
-        this.getContentPane().add(shipScrollPane);
-        this.getContentPane().add(playerLabel);
-        this.getContentPane().add(playerScrollPane);
-        this.getContentPane().add(messageLabel);
-        this.getContentPane().add(messageScrollPane);
-
-        messageScrollPane.getViewport().add(messageTextArea, null);
-        playerScrollPane.getViewport().add(playerList, null);
-        shipScrollPane.getViewport().add(shipList, null);
-
-        setTitle("JTrek Monitor");
-        setResizable(false);
+        add(menuBar, BorderLayout.NORTH);
+        add(panel, BorderLayout.CENTER);
 
         pack();
     }
@@ -227,8 +231,7 @@ public class MonitorUI extends JFrame {
     }
 
     public void processData(String data) {
-        //System.out.println(data);
-        if (data.indexOf("DISC:ACK") != -1) {
+        if (data.contains("DISC:ACK")) {
             // disconnected from server
             isConnected = false;
             try {
@@ -237,7 +240,7 @@ public class MonitorUI extends JFrame {
                 e.printStackTrace();
             }
         }
-        else if (data.indexOf("SHIPS:") != -1) {
+        else if (data.contains("SHIPS:")) {
             // parse ship data
             int colonLoc = data.indexOf(":");
             int tildeLoc = data.indexOf("~");
@@ -252,7 +255,7 @@ public class MonitorUI extends JFrame {
 
             shipScrollPane.getViewport().add(shipList, null);
         }
-        else if (data.indexOf("MON:") != -1) {
+        else if (data.contains("MON:")) {
             // parse people monitoring
             int colonLoc = data.indexOf(":");
             int tildeLoc = data.indexOf("~");
@@ -267,37 +270,35 @@ public class MonitorUI extends JFrame {
 
             playerScrollPane.getViewport().add(playerList, null);
         }
-        else if (data.indexOf("COUNT:") != -1) {
+        else if (data.contains("COUNT:")) {
             // parse ship count
             int colonLoc = data.indexOf(":");
-            int ships = new Integer(data.substring(colonLoc + 1)).intValue();
+            int ships = new Integer(data.substring(colonLoc + 1));
             if (ships == 1) {
                 shipCountLabel.setText("" + ships + " Active Ship");
             } else {
                 shipCountLabel.setText("" + ships + " Active Ships");
             }
         }
-        else if (data.indexOf("BOT:") != -1) {
+        else if (data.contains("BOT:")) {
             // parse bot count
             int colonLoc = data.indexOf(":");
-            int bots = new Integer(data.substring(colonLoc + 1)).intValue();
+            int bots = new Integer(data.substring(colonLoc + 1));
             if (bots == 1) {
                 shipCountLabel.setText(shipCountLabel.getText() + " (" + bots + " bot)");
             } else {
                 shipCountLabel.setText(shipCountLabel.getText() + " (" + bots + " bots)");
             }
         }
-        else if (data.indexOf("MSG:") != -1) {
+        else if (data.contains("MSG:")) {
             // parse message
             int colonLoc = data.indexOf(":");
             String msgStr = data.substring(colonLoc + 1);
             messageTextArea.append(msgStr + "\r\n");
         }
-
     }
 
     private void login(String data) {
-        //System.out.println(data);
         if (data.equals("USER:ACK")) {
             loggedIn = true;
         } else {
@@ -352,14 +353,14 @@ public class MonitorUI extends JFrame {
         loginUser = dlg.playerField.getText();
         loginPwd = new String(dlg.passwordField.getPassword());
 
-        if (hostName == null || portNumber == null || loginUser == null || loginPwd == null ||
+        if (hostName == null || portNumber == null || loginUser == null ||
                 hostName.equals("") || portNumber.equals("") || loginUser.equals("") || loginPwd.equals("")) {
             messageTextArea.append("*** ERROR: need to fill out all fields on options screen before connecting. ***\r\n");
             return;
         }
 
         try {
-            socket = new Socket(hostName, new Integer(portNumber).intValue());
+            socket = new Socket(hostName, new Integer(portNumber));
 
             while (!socket.isConnected()) {
                 try {
@@ -382,7 +383,6 @@ public class MonitorUI extends JFrame {
 
             // send login data
             out.write(("USER:"+loginUser+"~"+loginPwd+"\r").getBytes());
-
 
             while (isConnected) {
                 if (loggedIn && !getInitialData) {
@@ -407,9 +407,9 @@ public class MonitorUI extends JFrame {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
+                    isConnected = false;
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
-
             }
         } catch (UnknownHostException u) {
             u.printStackTrace();
@@ -425,7 +425,6 @@ public class MonitorUI extends JFrame {
         dlg.setLocation((frmSize.width - dlgSize.width) / 2 + loc.x, (frmSize.height - dlgSize.height) / 2 + loc.y);
         dlg.setModal(true);
         dlg.pack();
-        dlg.show();
+        dlg.setVisible(true);
     }
 }
-

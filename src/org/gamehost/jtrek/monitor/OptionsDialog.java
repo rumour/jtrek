@@ -29,15 +29,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Jay
  * Date: Mar 9, 2004
  * Time: 3:18:58 PM
- * To change this template use File | Settings | File Templates.
  */
 public class OptionsDialog extends JDialog {
 	private static final long serialVersionUID = -8170448039012790669L;
-    MigLayout layout = new MigLayout();
     JLabel addressLabel = new JLabel();
     protected JTextField addressField = new JTextField();
     JLabel portLabel = new JLabel();
@@ -50,6 +47,8 @@ public class OptionsDialog extends JDialog {
 
     public OptionsDialog(JFrame parent) {
         super(parent);
+        setLayout(new BorderLayout());
+
         initUI();
     }
 
@@ -64,28 +63,32 @@ public class OptionsDialog extends JDialog {
         playerField.setText("");
         passwordField.setText("");
         
-        JPanel panel = new JPanel(new MigLayout());
+        JPanel panel = new JPanel(new MigLayout("ins 0, wrap 2", "[right][fill,grow]"));
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         panel.setMinimumSize(new Dimension(270, 101));
 
         panel.add(addressLabel);
         panel.add(addressField);
         panel.add(portLabel);
         panel.add(portField);
-        panel.add(playerField);
         panel.add(playerLabel);
+        panel.add(playerField);
         panel.add(passwordLabel);
         panel.add(passwordField);
-        panel.add(okButton);
+        panel.add(okButton, "skip 1");
 
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 saveOptions();
             }
         });
+
+        add(panel, BorderLayout.CENTER);
+        pack();
     }
 
     private void saveOptions() {
         // could persist the field settings to a config file here
-        this.hide();
+        setVisible(false);
     }
 }

@@ -22,16 +22,13 @@
 package org.gamehost.jtrek.monitor;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Jay
  * Date: Mar 9, 2004
  * Time: 6:52:19 PM
- * To change this template use File | Settings | File Templates.
  */
 public class Monitor {
-
     public static void main(String[] args) {
         MonitorUI m = new MonitorUI();
-        m.show();
+        m.setVisible(true);
     }
 }
