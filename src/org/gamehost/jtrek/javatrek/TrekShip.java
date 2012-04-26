@@ -43,7 +43,6 @@ public abstract class TrekShip extends TrekObject {
     public TrekStarbase dockTarget;
     public TrekShipDebris shipDebrisTarget;
     public TrekZone zoneTarget;
-    public TrekBlackhole blackholeTarget;
     public TrekZone pulsarTarget;
     public TrekZone quasarTarget;
     public TrekStar starTarget;
@@ -90,7 +89,6 @@ public abstract class TrekShip extends TrekObject {
     public int whTimeElapsed;
     public int transwarpCounter;
     public int warpenUsed = 0;
-    public int zoneTickCounter;
     public int asteroidTickCounter;
 
     // Orbiting and Docking related.
@@ -138,7 +136,6 @@ public abstract class TrekShip extends TrekObject {
     public boolean transwarpTracking;
     public int transwarpDirection;
     public int visibility;
-    public int currentVisibility;
 
     // Cloak
     public boolean cloak;
@@ -346,11 +343,7 @@ public abstract class TrekShip extends TrekObject {
         checkOverwarpDmgWarp();
 
         // check for damage level, and trigger appropriate flags
-        if (damage > 100) {
-            lifeSupportFailing = true;
-        } else {
-            lifeSupportFailing = false;
-        }
+        lifeSupportFailing = damage > 100;
 
         if (damage > 200) {
             doDestruction(true);
@@ -373,8 +366,6 @@ public abstract class TrekShip extends TrekObject {
                 seeker = true;
             }
         }
-
-        return;
     }
 
     private void checkOverwarpDmgWarp() {
@@ -574,7 +565,7 @@ public abstract class TrekShip extends TrekObject {
 
         // Raise the shields.
         if (raisingShields) {
-            raiseShields(1);
+            raiseShields();
         }
 
         handleSelfDestruct();
@@ -589,7 +580,6 @@ public abstract class TrekShip extends TrekObject {
 
             if (damage > 150)
                 lifeSupport--;
-            //totalDamageReceived++;
 
             if (damage == 200)
                 lifeSupport--;
@@ -623,7 +613,6 @@ public abstract class TrekShip extends TrekObject {
         clearNebulaTarget();
 
         handleEscapePod();
-        return;
     }
 
     private void handleEscapePod() {
@@ -760,7 +749,7 @@ public abstract class TrekShip extends TrekObject {
             // do damage after 20 seconds of not completing docking/orbiting procedure, and every 5 secs after
             if ((orbitDmgCounter == 20) || (orbitDmgCounter > 20 && ((orbitDmgCounter - 20) % 5 == 0))) {
                 Random dmgRand = new Random();
-                // start damage at around 20 ints per occurance, increase to a max of about 40
+                // start damage at around 20 ints per occurrence, increase to a max of about 40
                 int dmgAmount = Math.abs(dmgRand.nextInt() % 5) + 15;
                 if (orbitDmgCounter > 20) {
                     int extraDmg = Math.abs(dmgRand.nextInt() % (orbitDmgCounter - 20));
@@ -1001,7 +990,7 @@ public abstract class TrekShip extends TrekObject {
                         }
                     }
 
-                    if (planet.installsCloak(this) && shipClass == "II-A") {
+                    if (planet.installsCloak(this) && shipClass.equals("II-A")) {
                         if (!cloak && orbitDuration > 3)
                             parent.hud.sendMessage("Your cloaking device is being installed.");
 
@@ -1011,7 +1000,7 @@ public abstract class TrekShip extends TrekObject {
                         }
                     }
 
-                    if (planet.installsTranswarp(this) && shipClass == "EXCEL") {
+                    if (planet.installsTranswarp(this) && shipClass.equals("EXCEL")) {
                         if (!transwarp && orbitDuration > 4) {
                             transwarp = true;
                             parent.hud.sendMessage("Your transwarp drive has been installed.");
@@ -1019,7 +1008,6 @@ public abstract class TrekShip extends TrekObject {
                     }
 
                     if (planet.givesCrystals(this) && getCrystalCount() > 0) {
-
                         if (orbitDuration > 5 && getCrystalCount() > 0) {
                             loading = true;
 
@@ -1105,15 +1093,12 @@ public abstract class TrekShip extends TrekObject {
                 parent.hud.sendMessage(upgrade.getOrbitMessage());
             }
         }
-
     }
 
     private void handleDmgControl() {
         // Fix the ship.
         if (damageControl > 0) {
             double repairIE = Math.abs(gen.nextInt() % 540);
-            //double repairWE = Math.abs(gen.nextInt() % 270);
-            //double repairINT = Math.abs(gen.nextInt() % 270);
             double repairWEINT = Math.log(damageControl) / 15 * 100; //percentage chance of fixing
             double testWE = Math.abs(gen.nextInt() % 100) + 1;
             double testINT = Math.abs(gen.nextInt() % 100) + 1;
@@ -1133,7 +1118,6 @@ public abstract class TrekShip extends TrekObject {
             if (damage <= 100) {
                 lifeSupportFailing = false;
             }
-
         }
     }
 
@@ -1162,7 +1146,7 @@ public abstract class TrekShip extends TrekObject {
             }
 
             if (selfDestructCountdown < 4 && selfDestructCountdown > 0) {
-                parent.hud.clearMessage(2); // sendText(TrekAnsi.clearRow(2, parent));
+                parent.hud.clearMessage(2);
                 parent.hud.sendMessage(selfDestructCountdown + "...");
             }
 
@@ -1196,9 +1180,9 @@ public abstract class TrekShip extends TrekObject {
         }
 
         if (phaserFireTimeout > 0) {
-            if (this.shipClass == "CL-13") {
+            if (this.shipClass.equals("CL-13")) {
                 phaserFireTimeout -= 3;
-            } else if (this.shipClass == "WARBIRD") {
+            } else if (this.shipClass.equals("WARBIRD")) {
                 phaserFireTimeout--;
             } else {
                 phaserFireTimeout -= 2;
@@ -1247,30 +1231,25 @@ public abstract class TrekShip extends TrekObject {
     private void handleCloak() {
         // If the ship is cloaked.
         if (cloaked) {
-            if (cloaked) {
-                cloakTimeCurrent -= 1;
-                if (cloakTimeCurrent == 10) {
-                    parent.hud.sendMessageBeep("WARNING!  Your cloaking device will burn out in 10 seconds!");
-                }
-
-                if (cloakTimeCurrent <= 0) {
-                    cloakTimeCurrent = 0;
-                    cloakBurnt = true;
-                    cloaked = false;
-                }
+            cloakTimeCurrent -= 1;
+            if (cloakTimeCurrent == 10) {
+                parent.hud.sendMessageBeep("WARNING!  Your cloaking device will burn out in 10 seconds!");
             }
 
+            if (cloakTimeCurrent <= 0) {
+                cloakTimeCurrent = 0;
+                cloakBurnt = true;
+                cloaked = false;
+            }
         } else {
             if (cloakCounter == cloakRegeneration) {
                 if (cloakBurnt) {
                     // nothing
                 } else {
-                    if (!cloaked) {
-                        cloakTimeCurrent += 1;
+                    cloakTimeCurrent += 1;
 
-                        if (cloakTimeCurrent > cloakTime) {
-                            cloakTimeCurrent = cloakTime;
-                        }
+                    if (cloakTimeCurrent > cloakTime) {
+                        cloakTimeCurrent = cloakTime;
                     }
 
                     cloakCounter = 1;
@@ -1384,10 +1363,6 @@ public abstract class TrekShip extends TrekObject {
         damageControl = 0;
     }
 
-    public void raiseShields() {
-        raisingShields = true;
-    }
-
     public void holdShieldLevel() {
         raisingShields = false;
     }
@@ -1407,17 +1382,15 @@ public abstract class TrekShip extends TrekObject {
                      *
                      */
 
-                Trek3DPoint current = null;
-                Trek3DPoint target = null;
+                Trek3DPoint current;
+                Trek3DPoint target;
 
                 if (interceptTarget != null) {
                     if (TrekMath.getDistance(this, interceptTarget) < scanRange && new Double(TrekMath.getDistance(this, interceptTarget)).intValue() != 0) {
-                        //						TrekLog.logMessage("Start Vector values, x = " + vector.x + "  y = " + vector.y + "  z = " + vector.z);
                         current = new Trek3DPoint(point);
                         target = new Trek3DPoint(interceptTarget.point);
                         target.subtract(current);
                         vector.applyPoint(target);
-                        //						TrekLog.logMessage("End Vector values, x = " + vector.x + "  y = " + vector.y + "  z = " + vector.z);
                     }
                 } else if (intCoordPoint != null) {
                     if ((TrekMath.getDistance(point, intCoordPoint) < scanRange) && (new Double(TrekMath.getDistance(point, intCoordPoint)).intValue() != 0)) {
@@ -1428,8 +1401,6 @@ public abstract class TrekShip extends TrekObject {
                     }
                 }
             }
-
-            //		  vector.normalize();
 
             Trek3DVector returnVector = new Trek3DVector(vector);
             double distance = TrekMath.getDistanceMoved(warpSpeed);
@@ -1453,7 +1424,7 @@ public abstract class TrekShip extends TrekObject {
                 return;
             }
 
-            amount = new Double(parent.hud.getFormattedWarpSpeed(amount)).doubleValue();
+            amount = new Double(parent.hud.getFormattedWarpSpeed(amount));
 
             // If it's an all stop..
             if (amount == 0) {
@@ -1478,7 +1449,7 @@ public abstract class TrekShip extends TrekObject {
             }
 
             // Check for loss of intercept.
-            if (Math.abs(warpSpeed) > new Double(maxTurnWarp).doubleValue()) {
+            if (Math.abs(warpSpeed) > maxTurnWarp) {
                 interceptTarget = null;
                 intCoordPoint = null;
             }
@@ -1504,7 +1475,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public void setTurnWarp(int direction) {
-        double targetWarp = 0;
+        double targetWarp;
         if (direction == MOVEMENT_FORWARD) {
             targetWarp = maxTurnWarp;
         } else {
@@ -1528,7 +1499,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public void setCruiseWarp(int direction) {
-        double targetWarp = 0;
+        double targetWarp;
         if (direction == MOVEMENT_FORWARD) {
             targetWarp = maxCruiseWarp;
         } else {
@@ -1552,7 +1523,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public void alterHeading(int hdgAmount, int pchAmount) {
-        int newHeading = Integer.valueOf(getHeading()).intValue();
+        int newHeading = Integer.valueOf(getHeading());
 
         newHeading += hdgAmount;
         newHeading %= 360;
@@ -1563,7 +1534,7 @@ public abstract class TrekShip extends TrekObject {
             pitchStr = pitchStr.substring(1, pitchStr.length());
         }
 
-        int newPitch = Integer.valueOf(pitchStr).intValue();
+        int newPitch = Integer.valueOf(pitchStr);
 
         newPitch += pchAmount;
 
@@ -1629,13 +1600,11 @@ public abstract class TrekShip extends TrekObject {
         if (thisShip == null)
             return;
 
-        TrekShip targetShip = thisShip;
-
-        if (parent.hud.showStats && parent.hud.targetShip == targetShip) {
+        if (parent.hud.showStats && parent.hud.targetShip == thisShip) {
             return;
         }
 
-        parent.hud.showShipStats(targetShip);
+        parent.hud.showShipStats(thisShip);
 
     }
 
@@ -1699,7 +1668,6 @@ public abstract class TrekShip extends TrekObject {
             parent.hud.updateScanner();
         } else {
             parent.hud.sendMessage("Ship " + thisLetter + " not in the area.");
-            return;
         }
     }
 
@@ -1773,9 +1741,7 @@ public abstract class TrekShip extends TrekObject {
                 if (Math.abs(warpSpeed) > maxTurnWarp) {
                     // check for high speed damage
                     applyTurnDamage(startHdg, startPch);
-                    return;
                 }
-
             }
         } catch (Exception e) {
             TrekLog.logException(e);
@@ -1828,9 +1794,7 @@ public abstract class TrekShip extends TrekObject {
             // handle turn damage
             if (Math.abs(warpSpeed) > maxTurnWarp) {
                 applyTurnDamage(startHdg, startPch);
-                return;
             }
-
         } catch (Exception e) {
             TrekLog.logException(e);
         }
@@ -1919,15 +1883,12 @@ public abstract class TrekShip extends TrekObject {
         }
 
         if (TrekMath.getDistance(this, thisObj) > this.scanRange) {
-            //parent.hud.sendMessage("Ship " + thisLetter + " not in the area.");
             return;
         }
 
         TrekShip ship = (TrekShip) thisObj;
 
-        if (ship.cloaked) {
-            //parent.hud.sendMessage("Ship " + thisLetter + " not in the area.");
-        } else {
+        if (!ship.cloaked) {
             interceptCoords(ship.point.x, ship.point.y, ship.point.z);
         }
     }
@@ -1958,7 +1919,7 @@ public abstract class TrekShip extends TrekObject {
     public void applyTurnDamage(double hdg1, double pch1) {
         double startDmg = damage;
 
-        double speedDiff = 0;
+        double speedDiff;
         if (transwarpEngaged) {
             if (warpSpeed >= 30) {
                 // positive transwarp
@@ -2033,7 +1994,7 @@ public abstract class TrekShip extends TrekObject {
         damageControl -= amount;
     }
 
-    public void raiseShields(int amount) {
+    public void raiseShields() {
         if (!raisingShields) {
             return;
         }
@@ -2076,7 +2037,6 @@ public abstract class TrekShip extends TrekObject {
 
     // look for systems that have energy applied to them; reduce that energy to allow shields to rise to 100%
     public void deallocateEnergy() {
-
         int calcEnergy = getAvailablePower();
         if (raisingShields && shields != 100) {
             // reduce in order: dmg ctl, torps, phasers, cloak
@@ -2148,8 +2108,8 @@ public abstract class TrekShip extends TrekObject {
         }
 
         double maxDamage = phasers * 25;
-        double percentOfRange = 0;
-        double percentOfDamage = 0;
+        double percentOfRange;
+        double percentOfDamage;
 
         // Figure out our actual raw damage.
         if (lockTarget != null) {
@@ -2212,7 +2172,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     /**
-     * Normal phaser operation. Override in ship class for differnt phaser types.
+     * Normal phaser operation. Override in ship class for different phaser types.
      */
     public void loadPhasers(int amount) {
         if (this.checkPhaserCool()) {
@@ -2652,7 +2612,7 @@ public abstract class TrekShip extends TrekObject {
 
     protected void doScore(TrekStarbase base) {
         if (damageGiven > 0 || bonus > 0) {
-            int totalGold = 0;
+            int totalGold;
 
             if (currentQuadrant.name.equals("Gamma Quadrant")) {
                 totalGold = (int) Math.round((damageGiven + bonus) * .11);
@@ -2789,11 +2749,9 @@ public abstract class TrekShip extends TrekObject {
                 selfDestructCountdown = 27;
                 parent.hud.sendMessage("Auto-destruct sequence cancelled.");
             }
-            return;
         } else {
             selfDestruct = true;
             selfDestructCountdown = 27;
-            return;
         }
     }
 
@@ -2838,17 +2796,17 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public String getBearingToObj(TrekObject to) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         Trek3DPoint targetObjPoint = new Trek3DPoint(to.point);
         Trek3DPoint currentPoint = new Trek3DPoint(this.point);
 
         Trek3DVector bearingVector = new Trek3DVector(targetObjPoint.x - currentPoint.x, targetObjPoint.y - currentPoint.y, targetObjPoint.z - currentPoint.z);
 
-        int head = new Integer((int) Math.round(bearingVector.getHeading())).intValue();
+        int head = (int) Math.round(bearingVector.getHeading());
         String headPad = (head < 10) ? "  " : (head < 100) ? " " : "";
 
-        result.append(headPad + head);
+        result.append(headPad).append(head);
         result.append("'");
 
         double pitch = bearingVector.getPitch();
@@ -2856,18 +2814,18 @@ public abstract class TrekShip extends TrekObject {
         String sign = (pitch < 0) ? "-" : "+";
         String pitchPad = (Math.abs(Math.round(pitch)) < 10) ? "0" : "";
 
-        result.append(sign + pitchPad);
-        result.append(new Integer(Math.abs((int) Math.round(pitch))).toString());
+        result.append(sign).append(pitchPad);
+        result.append(Integer.toString(Math.abs((int) Math.round(pitch))));
 
         return result.toString();
     }
 
     public String getBearingToMsg() {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         Trek3DVector bearingVector = new Trek3DVector(msgPoint.x - point.x, msgPoint.y - point.y, msgPoint.z - point.z);
 
-        result.append(new Integer((int) Math.round(bearingVector.getHeading())).toString());
+        result.append(Integer.toString((int) Math.round(bearingVector.getHeading())));
         result.append("'");
 
         double pitch = bearingVector.getPitch();
@@ -2875,18 +2833,18 @@ public abstract class TrekShip extends TrekObject {
         String sign = (pitch < 0) ? "" : "+";
 
         result.append(sign);
-        result.append(new Integer((int) Math.round(pitch)).toString());
+        result.append(Integer.toString((int) Math.round(pitch)));
 
         return result.toString();
     }
 
     public String getHeading() {
-        String returnString = "";
+        String returnString;
 
         if (previousHeading != -1) {
-            returnString = new Integer(Math.abs(previousHeading)).toString();
+            returnString = Integer.toString(Math.abs(previousHeading));
         } else {
-            returnString = new Integer((int) Math.round(vector.getHeading())).toString();
+            returnString = Integer.toString((int) Math.round(vector.getHeading()));
         }
 
         return returnString;
@@ -2897,7 +2855,7 @@ public abstract class TrekShip extends TrekObject {
         String sign = (pitch < 0) ? "-" : "+";
         String pad = (Math.abs(Math.round(pitch)) < 10) ? "0" : "";
 
-        return sign + pad + (new Integer(Math.abs((int) Math.round(pitch))).toString());
+        return sign + pad + (Integer.toString(Math.abs((int) Math.round(pitch))));
     }
 
     public void changeHeading(int hdg, int pch) {
@@ -3062,7 +3020,6 @@ public abstract class TrekShip extends TrekObject {
             interceptTarget = null;
         }
 
-
         transwarpCounter = 13;
         doTranswarp = true;
     }
@@ -3110,8 +3067,8 @@ public abstract class TrekShip extends TrekObject {
 
                 double maxDamage = (antiMatter / 50) * 25;
 
-                double percentOfRange = 0;
-                double percentOfDamage = 0;
+                double percentOfRange;
+                double percentOfDamage;
 
                 for (int x = 0; x < shipsInRange.size(); x++) {
                     TrekShip boomTarget = (TrekShip) shipsInRange.elementAt(x);
@@ -3125,23 +3082,6 @@ public abstract class TrekShip extends TrekObject {
             }
 
             shipDestroyed = true;
-        }
-    }
-
-    public String getPhaserString() {
-        switch (this.phaserType) {
-            case PHASER_AGONIZER:
-                return "Agonizer";
-            case PHASER_EXPANDINGSPHEREINDUCER:
-                return "Expanding Sphere Inducer";
-            case PHASER_NORMAL:
-                return "Normal Phasers";
-            case PHASER_TELEPORTER:
-                return "Teleporter";
-            case PHASER_DISRUPTOR:
-                return "Disruptor";
-            default:
-                return "Unknown phaser type.";
         }
     }
 
@@ -3184,7 +3124,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public synchronized void updateBattle(TrekDamageStat stat) {
-        int warpEnergyDamage = 0;
+        int warpEnergyDamage;
         Random gen = new Random();
 
         if (stat.victor instanceof TrekMine) {
@@ -3232,7 +3172,7 @@ public abstract class TrekShip extends TrekObject {
                     warpEnergyDamage = intsReceived - (Math.abs(gen.nextInt() % modifier));
                 }
 
-                // If we have dylithium crystal, deminish them first.
+                // If we have dilithium crystal, diminish them first.
                 if (currentCrystalCount > 0) {
                     currentCrystalCount -= warpEnergyDamage;
 
@@ -3278,7 +3218,7 @@ public abstract class TrekShip extends TrekObject {
         // First let's get our current available power from the energy.
         // Warp Energy + Impulse Energy = Total Energy Available
         // If no anti-matter, then warp energy is not available.
-        int totalEnergy = 0;
+        int totalEnergy;
 
         if (antiMatter <= 0) {
             totalEnergy = this.impulseEnergy;
@@ -3398,7 +3338,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public int getCrystalCount() {
-        // The number of dilythium crystals to get.
+        // The number of dilithium crystals to get.
         return (maxWarpEnergy - warpEnergy) + (maxImpulseEnergy - impulseEnergy) + (maxCrystalStorage - currentCrystalCount);
     }
 
@@ -3445,9 +3385,6 @@ public abstract class TrekShip extends TrekObject {
             if (goldTarget.dbPlayerID == parent.dbPlayerID) {
                 String outputString = "*** Poss Bank: " + parent.shipName + " / " + goldTarget.ownerName + " / " + goldTarget.amount +
                         ", pID: " + parent.dbPlayerID;
-                // old message
-                //"*** Poss Bank: " + parent.shipName + " picking up " + goldTarget.amount +
-                //" gold from " + goldTarget.ownerName + ".  Player ID: " + parent.dbPlayerID;
                 TrekLog.logMessage(outputString);
                 TrekServer.sendMsgToAdmins(outputString, goldTarget, true, false);
             }
@@ -3486,9 +3423,6 @@ public abstract class TrekShip extends TrekObject {
                 if (parent.dbPlayerID == shipDebris.dbPlayerID) {
                     String outputString = "*** Poss Bank: " + parent.shipName + " / " + shipDebris.whos + " (debris) / " + shipDebris.gold +
                             ", pID: " + parent.dbPlayerID;
-                    // old message
-                    // "*** Possible Bank: " + parent.shipName + " picking up " + shipDebris.gold +
-                    // " gold from " + shipDebris.whos + " debris object.  Player ID: " + parent.dbPlayerID;
                     TrekLog.logMessage(outputString);
                     TrekServer.sendMsgToAdmins(outputString, shipDebris, true, false);
                 }
@@ -3536,10 +3470,7 @@ public abstract class TrekShip extends TrekObject {
             if (currentCrystalCount > maxCrystalStorage) {
                 currentCrystalCount = maxCrystalStorage;
             }
-
-            return;
         }
-
     }
 
     public void updateMsgPoint(Trek3DPoint p) {
@@ -3547,11 +3478,7 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public boolean isPlaying() {
-        if (parent.state != TrekPlayer.WAIT_PLAYING) {
-            return false;
-        }
-
-        return true;
+        return parent.state == TrekPlayer.WAIT_PLAYING;
     }
 
     public void toggleJamShipSlot(String shipLetter) {
@@ -3582,11 +3509,11 @@ public abstract class TrekShip extends TrekObject {
 
     public void reportJammedSlots() {
         int jamCount = 0;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("You are now ignoring: ");
         for (int x = 0; x < jamShips.length; x++) {
             if (jamShips[x]) {
-                sb.append(TrekUtilities.convertArrayIndexToShipLetter(x) + " ");
+                sb.append(TrekUtilities.convertArrayIndexToShipLetter(x)).append(" ");
                 jamCount++;
             }
         }
@@ -3603,7 +3530,6 @@ public abstract class TrekShip extends TrekObject {
             return visibility / 3;
         else
             return visibility;
-
     }
 
     public void doTractorBeam() {
@@ -3669,13 +3595,13 @@ public abstract class TrekShip extends TrekObject {
      * @param thisShip The ship that attacked.
      */
     public void addConflict(TrekShip thisShip) {
-        if (activeConflicts.containsKey(new Long(thisShip.parent.dbConnectionID).toString())) {
+        if (activeConflicts.containsKey(Long.toString(thisShip.parent.dbConnectionID))) {
             return;
         }
 
         TrekLog.logMessage(name + ": Adding conflict - " + thisShip.name);
 
-        activeConflicts.put(new Long(thisShip.parent.dbConnectionID).toString(), thisShip);
+        activeConflicts.put(Long.toString(thisShip.parent.dbConnectionID), thisShip);
         //only add a conflict if you have inflicted damage on the enemy... if you're just a target, you don't get one
         //thisShip.addConflict(this);
 
@@ -3697,13 +3623,12 @@ public abstract class TrekShip extends TrekObject {
 
             // If the ship is null, remove the active conflict.
             if (conflictPlayer == null) {
-                activeConflicts.remove(new Long(conflictPlayer.parent.dbConnectionID).toString());
                 continue;
             }
 
             // If the player is gone, remove the active conflict.
             if (conflictPlayer.parent.state != TrekPlayer.WAIT_PLAYING) {
-                activeConflicts.remove(new Long(conflictPlayer.parent.dbConnectionID).toString());
+                activeConflicts.remove(Long.toString(conflictPlayer.parent.dbConnectionID));
                 continue;
             }
 
@@ -3711,10 +3636,9 @@ public abstract class TrekShip extends TrekObject {
             double actualScanRange = (conflictPlayer.scanRange > scanRange) ? conflictPlayer.scanRange : scanRange;
 
             if (TrekMath.getDistance(this, conflictPlayer) > actualScanRange) {
-                activeConflicts.remove(new Long(conflictPlayer.parent.dbConnectionID).toString());
+                activeConflicts.remove(Long.toString(conflictPlayer.parent.dbConnectionID));
                 continue;
             }
-
         }
     }
 
@@ -3729,17 +3653,11 @@ public abstract class TrekShip extends TrekObject {
     }
 
     public boolean isScanning() {
-        if (scanTarget != null)
-            return true;
-        else
-            return false;
+        return scanTarget != null;
     }
 
     public boolean isWeaponsLocked() {
-        if (lockTarget != null)
-            return true;
-        else
-            return false;
+        return lockTarget != null;
     }
 
     public void doClassSpecificTick() {
