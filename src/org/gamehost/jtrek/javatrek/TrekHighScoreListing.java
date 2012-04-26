@@ -75,12 +75,12 @@ public class TrekHighScoreListing {
             if (className.equals("INTERCEPTOR")) {
                 className = "INTRCPTR";
             }
-            gold = new Integer(tokens.nextToken()).intValue();
-            dmgGiven = new Integer(tokens.nextToken()).intValue();
-            bonus = new Integer(tokens.nextToken()).intValue();
-            dmgReceived = new Integer(tokens.nextToken()).intValue();
-            conflicts = new Integer(tokens.nextToken()).intValue();
-            breakSaves = new Integer(tokens.nextToken()).intValue();
+            gold = new Integer(tokens.nextToken());
+            dmgGiven = new Integer(tokens.nextToken());
+            bonus = new Integer(tokens.nextToken());
+            dmgReceived = new Integer(tokens.nextToken());
+            conflicts = new Integer(tokens.nextToken());
+            breakSaves = new Integer(tokens.nextToken());
             saveDate = tokens.nextToken();
             starbaseLetter = tokens.nextToken();
 

@@ -7,8 +7,7 @@ JavaTrek is based on Chuck L. Peterson's MTrek.
 
 ----------------------------------------------------------
 
-JavaTrek is a real time space combat simulator. Controlled via a keyboard through a telnet interface, you can choose from a variety of ships to battle it
-out for gold in a text based 3d environment.
+JavaTrek is a real time space combat simulator. Controlled via a keyboard through a telnet interface, you can choose from a variety of ships to battle it out for gold in a text based 3d environment.
 
 Requirements:
 Java Runtime Environment or SDK 1.6.0 or better.
@@ -16,9 +15,9 @@ MySQL database accessible from the machine running the server.
 
 Running JavaTrek:
 1. Download and install a compatible version of the Java Runtime Environment or SDK.  (See above.)
-2. Create your MySQL database and note it's server, username, password and database name.
-3. Execute the jtrek_tables.sql file inside the MySQL database so that the table structure is created.
-4. Make a copy of "jtrek.properties.blank" and name it "jtrek.properties".  Update the jdbc.url, jdbc.user and jdbc.password fields.  Save the file.
+2. Create your MySQL/PostgreSQL database and note it's server, username, password and database name.
+3. Execute the appropriate jtrek_tables.sql-xxxxxxx file inside the database so that the table structure is created.
+4. Make a copy of "jtrek.properties.blank" and name it "jtrek.properties".  Update the jdbc.driver, jdbc.url, jdbc.user and jdbc.password fields.  Save the file.
 
 WINDOWS:
 Ensure that the bin/ folder in your Java JRE is in your system path.
@@ -44,7 +43,9 @@ Restart the server by executing the bat file or script.
 
 CREATING A Q SHIP:
 Q ships are the "administrative" ships of the game.  Basically indestructable.  Powerful weapons.  Infinite cloak.
-Change the field "ship_class" in the "ships" table to "Q".  eg. Execute this query in MySQL in your database.  UPDATE ships SET ship_class="Q" WHERE ship_name="Burninator";
+Change the field "ship_class" in the "ships" table of one of your existing ships to "Q".
+  eg. Execute this query in your database: UPDATE ships SET ship_class="Q" WHERE ship_name="Burninator";
+If you saved off a non-cloaking ship, you may want to set ship_cloak = true while you're at it.
 
 Admiral Commands:  CTRL+A in a Q ship.
 create gold <amount> - Creates an amount of gold.

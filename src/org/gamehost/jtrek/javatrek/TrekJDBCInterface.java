@@ -22,6 +22,7 @@
 package org.gamehost.jtrek.javatrek;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -48,6 +49,7 @@ public class TrekJDBCInterface {
 //    public static final String ORDER_BY_DMGGVN = "ship_damagegiven";
 //    public static final String ORDER_BY_DMGRCVD = "ship_damagereceived";
 //    public static final String ORDER_BY_BONUS = "ship_bonus";
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("MMM d");
 
 
     public TrekJDBCInterface() {
@@ -754,12 +756,12 @@ public class TrekJDBCInterface {
 
     public Vector getOverallHighScores(String sortOption) {
         Vector highScores = new Vector();
-        StringBuffer score = new StringBuffer();
+        StringBuilder score = new StringBuilder();
         try {
             PreparedStatement getTopOverallStmt =
                     myCon.prepareStatement(
                             "SELECT ship_name, ship_class, ship_gold, ship_damagegiven, ship_bonus, ship_damagereceived, ship_conflicts, "
-                                    + "ship_breaksaves, ship_lastlogin, ship_docktarget, ship_quadrant, DATE_FORMAT(ship_lastlogin, '%b %d') FROM " + getShipDB() + " WHERE "
+                                    + "ship_breaksaves, ship_lastlogin, ship_docktarget, ship_quadrant, ship_lastlogin FROM " + getShipDB() + " WHERE "
                                     + " ship_alive = 1 AND ship_class <> 'Q' ORDER BY ? DESC LIMIT 20");
             getTopOverallStmt.setString(1, sortOption);
             rs = getTopOverallStmt.executeQuery();
@@ -780,7 +782,7 @@ public class TrekJDBCInterface {
                 score.append("~");
                 score.append(rs.getInt("ship_breaksaves"));
                 score.append("~");
-                score.append(rs.getString(12));
+                score.append(getLoginDateStr(rs.getTimestamp("ship_lastlogin")));
                 score.append("~");
                 String dockLetter = rs.getString("ship_docktarget");
                 if (dockLetter.equals("coord")) {
@@ -818,7 +820,7 @@ public class TrekJDBCInterface {
                 }
                 highScores.addElement(
                         new TrekHighScoreListing(score.toString()));
-                score = new StringBuffer();
+                score = new StringBuilder();
             }
         } catch (SQLException SQLe) {
             TrekLog.logError(
@@ -829,14 +831,18 @@ public class TrekJDBCInterface {
         return highScores;
     }
 
+    private String getLoginDateStr(Timestamp timestamp) {
+        return formatter.format(timestamp);
+    }
+
     public Vector getClassHighScores(String shipClass, String sortOption) {
         Vector highScores = new Vector();
-        StringBuffer score = new StringBuffer();
+        StringBuilder score = new StringBuilder();
         try {
             PreparedStatement getTopClassStmt =
                     myCon.prepareStatement(
                             "SELECT ship_name, ship_gold, ship_damagegiven, ship_bonus, ship_damagereceived, ship_conflicts, "
-                                    + "ship_breaksaves, ship_lastlogin, ship_docktarget, ship_quadrant, DATE_FORMAT(ship_lastlogin, '%b %d') FROM " + getShipDB()
+                                    + "ship_breaksaves, ship_lastlogin, ship_docktarget, ship_quadrant, ship_lastlogin FROM " + getShipDB()
                                     + " WHERE ship_alive = 1 AND ship_class = ? ORDER BY ? DESC LIMIT 20");
             getTopClassStmt.setString(1, shipClass);
             getTopClassStmt.setString(2, sortOption);
@@ -858,7 +864,7 @@ public class TrekJDBCInterface {
                 score.append("~");
                 score.append(rs.getInt("ship_breaksaves"));
                 score.append("~");
-                score.append(rs.getString(11));
+                score.append(getLoginDateStr(rs.getTimestamp("ship_lastlogin")));
                 score.append("~");
                 String dockLetter = rs.getString("ship_docktarget");
                 if (dockLetter.equals("coord")) {
@@ -894,9 +900,8 @@ public class TrekJDBCInterface {
 
                     score.append(dockLetter);
                 }
-                highScores.addElement(
-                        new TrekHighScoreListing(score.toString()));
-                score = new StringBuffer();
+                highScores.addElement(new TrekHighScoreListing(score.toString()));
+                score = new StringBuilder();
             }
         } catch (SQLException SQLe) {
             TrekLog.logError("*** ERROR ***   Problem retrieving class scores: " + shipClass + " sorted by: " + sortOption);
@@ -907,12 +912,12 @@ public class TrekJDBCInterface {
 
     public Vector getFleetHighScores(int playerID, String sortOption) {
         Vector highScores = new Vector();
-        StringBuffer score = new StringBuffer();
+        StringBuilder score = new StringBuilder();
         try {
             PreparedStatement getTopClassStmt =
                     myCon.prepareStatement(
                             "SELECT ship_name, ship_class, ship_gold, ship_damagegiven, ship_bonus, ship_damagereceived, ship_conflicts, "
-                                    + "ship_breaksaves, ship_lastlogin, ship_docktarget, ship_quadrant, DATE_FORMAT(ship_lastlogin, '%b %d') FROM " + getShipDB()
+                                    + "ship_breaksaves, ship_lastlogin, ship_docktarget, ship_quadrant, ship_lastlogin FROM " + getShipDB()
                                     + " WHERE ship_alive = 1 AND player_id = ? ORDER BY ? DESC LIMIT 20");
             getTopClassStmt.setInt(1, playerID);
             getTopClassStmt.setString(2, sortOption);
@@ -934,7 +939,7 @@ public class TrekJDBCInterface {
                 score.append("~");
                 score.append(rs.getInt("ship_breaksaves"));
                 score.append("~");
-                score.append(rs.getString(12));
+                score.append(getLoginDateStr(rs.getTimestamp("ship_lastlogin")));
                 score.append("~");
                 String dockLetter = rs.getString("ship_docktarget");
                 if (dockLetter.equals("coord")) {
@@ -972,7 +977,7 @@ public class TrekJDBCInterface {
                 }
                 highScores.addElement(
                         new TrekHighScoreListing(score.toString()));
-                score = new StringBuffer();
+                score = new StringBuilder();
             }
         } catch (SQLException SQLe) {
             TrekLog.logError("*** ERROR ***   Problem retrieving fleet scores: " + playerID + " sorted by: " + sortOption);
