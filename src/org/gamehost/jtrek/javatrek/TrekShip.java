@@ -3382,7 +3382,7 @@ public abstract class TrekShip extends TrekObject {
         if (TrekUtilities.isObjectGold(lockTarget)) {
             TrekGold goldTarget = (TrekGold) scanTarget;
             this.gold += goldTarget.amount;
-            if (goldTarget.dbPlayerID == parent.dbPlayerID) {
+            if (goldTarget.dbPlayerID == parent.dbPlayerID && parent.dbPlayerID != TrekServer.botPlayerId) {
                 String outputString = "*** Poss Bank: " + parent.shipName + " / " + goldTarget.ownerName + " / " + goldTarget.amount +
                         ", pID: " + parent.dbPlayerID;
                 TrekLog.logMessage(outputString);
@@ -3420,7 +3420,7 @@ public abstract class TrekShip extends TrekObject {
             if (shipDebris.gold > 0) {
                 gold += shipDebris.gold;
                 parent.hud.sendMessage("Beamed aboard " + shipDebris.gold + " gold.");
-                if (parent.dbPlayerID == shipDebris.dbPlayerID) {
+                if (parent.dbPlayerID == shipDebris.dbPlayerID && parent.dbPlayerID != TrekServer.botPlayerId) {
                     String outputString = "*** Poss Bank: " + parent.shipName + " / " + shipDebris.whos + " (debris) / " + shipDebris.gold +
                             ", pID: " + parent.dbPlayerID;
                     TrekLog.logMessage(outputString);

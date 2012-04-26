@@ -32,32 +32,23 @@ import java.util.Properties;
  * User: jay
  * Date: Aug 2, 2004
  * Time: 10:31:30 PM
- * To change this template use File | Settings | File Templates.
  */
 public class TrekPropertyReader {
-    // for reading in any properties we want to define in a file
-    // i.e. jdbc connection parameters
-    private static String fileName = "./jtrek.properties";
     private static Properties propertyPairs = null;
     private static TrekPropertyReader tpr = null;
 
     private TrekPropertyReader() {
+        String fileName = "./jtrek.properties";
         File propertyFile = new File(fileName);
         try {
             FileInputStream pfInputStream = new FileInputStream(propertyFile);
-            // do the process of populating the Hashtable of properties pairs here
             propertyPairs = new Properties();
             propertyPairs.load(pfInputStream);
-
-            // test code
-            // propertyPairs.list(System.out);
-
         } catch (FileNotFoundException fnfe) {
             fnfe.printStackTrace();
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-
     }
 
     protected static TrekPropertyReader getInstance() {
@@ -74,12 +65,11 @@ public class TrekPropertyReader {
 
     protected String getValue(String s) {
         String returnValue = "";
-        // do a look up in the Hashtable for the property defined by 's', and return the value
 
         try {
             returnValue = propertyPairs.getProperty(s);
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return returnValue;
     }
