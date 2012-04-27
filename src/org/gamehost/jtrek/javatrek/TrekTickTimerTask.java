@@ -75,7 +75,6 @@ public class TrekTickTimerTask extends TimerTask {
 
     private static void doSecondUpdate() {
         totalSeconds++;
-        int count = 0;
 
         if ((totalSeconds % 60) == 0) { // 1 minute tick
             // check all ships -- see if any are at 0,0,0 -- if so, set them to 1,1,1 (try to avoid negaverse bugs)
@@ -85,7 +84,6 @@ public class TrekTickTimerTask extends TimerTask {
                 Vector quadShips = q.getAllShips();
                 //System.out.println("*** Contains " + quadShips.size() + " ships.");
                 for (Enumeration e2 = quadShips.elements(); e2.hasMoreElements(); ) {
-                    count++;
                     //System.out.println("*** On ship: " + count);
                     TrekShip curShip = (TrekShip) e2.nextElement();
                     //System.out.println("*** Ship name: " + curShip.name);
@@ -148,5 +146,4 @@ public class TrekTickTimerTask extends TimerTask {
             target.updatePointLocations();
         }
     }
-
 }

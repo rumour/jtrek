@@ -1004,7 +1004,7 @@ public class TrekRawDataInterface extends TrekPlayer {
 
                     Timer timeToDie = new Timer();
 
-                    timeToDie.schedule(new TrekDeadThreadKiller(this), 1000);  // you have 1 second to comply, bitch
+                    timeToDie.schedule(new TrekDeadThreadKiller(this), 1000);  // you have 1 second to comply
 
                     /*dOut = new DeflaterOutputStream(bOut);
                     dataOut = new DataOutputStream(dOut);

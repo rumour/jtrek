@@ -106,7 +106,7 @@ public class TrekMonitorClient extends Thread {
         try {
             if (!outputBuffer.equals("")) {
                 outputBuffer = outputBuffer.replace('\010', '\000');
-                Timer timeToDie = new Timer();
+                Timer timeToDie = new Timer("MonitorClient-" + monPlayer);
                 timeToDie.schedule(new TrekDeadThreadKiller(this), 1000);  // keep socket locks from freezing app
 
                 out.write(outputBuffer.getBytes());

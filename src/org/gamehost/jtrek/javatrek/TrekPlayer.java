@@ -175,17 +175,13 @@ public class TrekPlayer extends Thread {
             out = sck.getOutputStream();
             try {
                 int slashIndex = sck.getInetAddress().toString().indexOf('/');
-                playerIP =
-                        sck.getInetAddress().toString().substring(slashIndex + 1);
+                playerIP = sck.getInetAddress().toString().substring(slashIndex + 1);
                 playerHostName = InetAddress.getByName(playerIP).toString();
             } catch (Exception e) {
                 TrekLog.logException(e);
             }
         } catch (IOException ioe) {
-            TrekLog.logMessage(
-                    "Could not create TrekPlayer object for "
-                            + sck.toString()
-                            + "!!");
+            TrekLog.logMessage("Could not create TrekPlayer object for " + sck.toString() + "!!");
         }
     }
 
@@ -2514,7 +2510,7 @@ public class TrekPlayer extends Thread {
                 try {
                     thisText = thisText.replace('\010', '\000');
                     if (state != WAIT_PLAYING) {
-                        Timer timeToDie = new Timer();
+                        Timer timeToDie = new Timer("TimeToDie1-" + shipName);
 
                         // if it's a bot, don't spawn new threads
                         if (this instanceof TrekBot) {
@@ -2532,23 +2528,36 @@ public class TrekPlayer extends Thread {
                                         if (theObservers.size() == 0) isObserved = false;
                                         continue;
                                     }
-                                    timeToDie = new Timer();
-                                    timeToDie.schedule(new TrekDeadThreadKiller(curObs), 1000);
+                                    TrekDeadThreadKiller task = new TrekDeadThreadKiller(curObs);
+                                    try {
+                                        timeToDie.schedule(task, 1000);
 
-                                    curObs.out.write(outputBuffer.getBytes());
-                                    curObs.out.flush();
+                                        curObs.out.write(outputBuffer.getBytes());
+                                        curObs.out.flush();
 
-                                    timeToDie.cancel();
+                                        timeToDie.cancel();
+                                    } finally {
+                                        task.cancel();
+                                        timeToDie.cancel();
+                                        timeToDie = null;
+                                    }
                                 }
                             }
                         } else {
                             if (!isObserving) {
-                                timeToDie.schedule(new TrekDeadThreadKiller(this), 1000);
+                                TrekDeadThreadKiller task = new TrekDeadThreadKiller(this);
+                                try {
+                                    timeToDie.schedule(task, 1000);
 
-                                out.write(thisText.getBytes());
-                                out.flush();
+                                    out.write(thisText.getBytes());
+                                    out.flush();
 
-                                timeToDie.cancel();
+                                    timeToDie.cancel();
+                                } finally {
+                                    task.cancel();
+                                    timeToDie.cancel();
+                                    timeToDie = null;
+                                }
                             }
 
                             if (isObserved) {
@@ -2562,14 +2571,20 @@ public class TrekPlayer extends Thread {
                                         continue;
                                     }
 
-                                    timeToDie = new Timer();
+                                    timeToDie = new Timer("TimeToDie2-" + shipName);
+                                    TrekDeadThreadKiller task = new TrekDeadThreadKiller(curObs);
+                                    try {
+                                        timeToDie.schedule(task, 1000);
 
-                                    timeToDie.schedule(new TrekDeadThreadKiller(curObs), 1000);
+                                        curObs.out.write(thisText.getBytes());
+                                        curObs.out.flush();
 
-                                    curObs.out.write(thisText.getBytes());
-                                    curObs.out.flush();
-
-                                    timeToDie.cancel();
+                                        timeToDie.cancel();
+                                    } finally {
+                                        task.cancel();
+                                        timeToDie.cancel();
+                                        timeToDie = null;
+                                    }
                                 }
                             }
                         }
@@ -2769,8 +2784,6 @@ public class TrekPlayer extends Thread {
                 if (!outputBuffer.equals("")) {
                     outputBuffer = outputBuffer.replace('\010', '\000');
 
-                    Timer timeToDie = new Timer();
-
                     if (this instanceof TrekBot) {
                         if (TrekServer.doBotHuds()) {
                             out.write(outputBuffer.getBytes());
@@ -2786,7 +2799,7 @@ public class TrekPlayer extends Thread {
                                     if (theObservers.size() == 0) isObserved = false;
                                     continue;
                                 }
-                                timeToDie = new Timer();
+                                Timer timeToDie = new Timer("TimeToDie3-" + shipName);
 
                                 timeToDie.schedule(new TrekDeadThreadKiller(curObs), 1000);
 
@@ -2798,6 +2811,7 @@ public class TrekPlayer extends Thread {
                         }
                     } else {
                         if (!isObserving) {
+                            Timer timeToDie = new Timer("TimeToDie4-" + shipName);
                             timeToDie.schedule(new TrekDeadThreadKiller(this), 1000);  // you have 1 second to comply
 
                             out.write(outputBuffer.getBytes());
@@ -2816,7 +2830,7 @@ public class TrekPlayer extends Thread {
                                     if (theObservers.size() == 0) isObserved = false;
                                     continue;
                                 }
-                                timeToDie = new Timer();
+                                Timer timeToDie = new Timer("TimeToDie5-" + shipName);
 
                                 timeToDie.schedule(new TrekDeadThreadKiller(curObs), 1000);
 

@@ -87,7 +87,6 @@ public final class TrekServer extends Thread {
         System.out.println("");
         // END GNU GPL Copyright Notice.
 
-
         // Initialize the quadrants hashtable.
         quadrants = new Hashtable();
         deletionTimers = new Vector();
@@ -372,7 +371,7 @@ public final class TrekServer extends Thread {
             quadrants.put("Delta Quadrant", quadrant);
 
             TrekLog.logMessage("Setting up Tick Timer...");
-            tickTimer = new Timer(true);
+            tickTimer = new Timer("TrekServer", true);
             tickTimer.scheduleAtFixedRate(new TrekTickTimerTask(), 0, 250);
 
             TrekLog.logMessage("Server is up and running.");
@@ -486,8 +485,14 @@ public final class TrekServer extends Thread {
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             // nothing
+            System.out.println("TrekServer.removePlayer");
         } catch (Exception f) {
             TrekLog.logException(f);
+        } finally {
+            player.interrupt();
+            if (player.getState() == State.BLOCKED) {
+                System.out.println("************* Thread is blocked trying to remove player: " + player.shipName);
+            }
         }
     }
 

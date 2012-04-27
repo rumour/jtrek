@@ -53,6 +53,7 @@ public abstract class TrekBot extends TrekPlayer {
 
             in = null;
             out = new FileOutputStream("./data/" + shipName + ".log");
+            super.setName("Thread-" + shipName);
         } catch (Exception e) {
             TrekLog.logException(e);
         }

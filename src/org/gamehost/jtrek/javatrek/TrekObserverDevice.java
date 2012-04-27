@@ -200,7 +200,7 @@ public class TrekObserverDevice extends TrekObject {
         tower = null;
         destroyed = true;
         currentQuadrant.removeObjectByScanLetter(scanLetter);
-        Timer recreateTimer = new Timer();
+        Timer recreateTimer = new Timer("Observer-" + name);
         recreateTimer.schedule(new TrekRegenerateObs(this), regenTime);
     }
 

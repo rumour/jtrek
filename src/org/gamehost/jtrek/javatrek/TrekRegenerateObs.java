@@ -64,7 +64,7 @@ public class TrekRegenerateObs extends TimerTask {
                         // quadrant full?
                         TrekLog.logMessage("Trying to respawn obs dev: " + regenObs.name + " -- " + regenObs.currentQuadrant.name + " full?");
                         // set it up to try again in a 5 minutes
-                        Timer recreateTimer = new Timer();
+                        Timer recreateTimer = new Timer("RegenObserver1-" + regenObs.name);
                         recreateTimer.schedule(new TrekRegenerateObs(regenObs), 300000); // 5 minutes
                     } else {
                         // add it to the quadrant
@@ -78,7 +78,7 @@ public class TrekRegenerateObs extends TimerTask {
                     // quadrant full?
                     TrekLog.logMessage("Trying to respawn obs dev(2): " + regenObs.name + " -- " + regenObs.currentQuadrant.name + " full?");
                     // set it up to try again in a 5 minutes
-                    Timer recreateTimer = new Timer();
+                    Timer recreateTimer = new Timer("RegenObserver2-" + regenObs.name);
                     recreateTimer.schedule(new TrekRegenerateObs(regenObs), 300000); // 5 minutes
                 } else {
                     // add it to the quadrant
