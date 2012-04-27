@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2003-2007  Joe Hopkinson, Jay Ashworth
+ *  Copyright (C) 2003-2012  Joe Hopkinson, Jay Ashworth
  *
  *  JavaTrek is based on Chuck L. Peterson's MTrek.
  *

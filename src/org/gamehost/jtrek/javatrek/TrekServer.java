@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2003-2007  Joe Hopkinson, Jay Ashworth
+ *  Copyright (C) 2003-2012  Joe Hopkinson, Jay Ashworth
  *
  *  JavaTrek is based on Chuck L. Peterson's MTrek.
  *
@@ -77,7 +77,7 @@ public final class TrekServer extends Thread {
      */
     public TrekServer(boolean debug) {
         // GNU GPL Copyright Notice.
-        System.out.println("JavaTrek, Copyright (C) 2003-2007 Joseph Hopkinson, Jay Ashworth");
+        System.out.println("JavaTrek, Copyright (C) 2003-2012 Joseph Hopkinson, Jay Ashworth");
         System.out.println("JavaTrek comes with ABSOLUTELY NO WARRANTY.  This is free");
         System.out.println("software, and you are welcome to redistribute it under certain");
         System.out.println("conditions; for details please refer to the COPYING file");
