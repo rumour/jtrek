@@ -50,7 +50,7 @@ public class TrekJDBCInterface {
 //    public static final String ORDER_BY_DMGRCVD = "ship_damagereceived";
 //    public static final String ORDER_BY_BONUS = "ship_bonus";
     private static final SimpleDateFormat formatter = new SimpleDateFormat("MMM d");
-
+    private boolean isPostgres;
 
     public TrekJDBCInterface() {
         try { // load the JDBC driver
@@ -65,6 +65,7 @@ public class TrekJDBCInterface {
         // establish connection
         try {
             myCon = DriverManager.getConnection(jdbcURL, jdbcUser, jdbcPwd);
+            isPostgres = jdbcDriver.toLowerCase().contains("postgres");
         } catch (SQLException SQLe) {
             TrekLog.logError("*** ERROR ***   Problems connecting to " + jdbcURL + ": as " + jdbcUser + "/" + jdbcPwd);
             TrekLog.logError("SQL State: " + SQLe.getSQLState());
@@ -1016,7 +1017,11 @@ public class TrekJDBCInterface {
             createConnStmt.setTimestamp(4, timeIn);
             createConnStmt.setString(5, player.playerIP);
             createConnStmt.execute();
-            PreparedStatement getConnIDStmt = myCon.prepareStatement("SELECT last_insert_id() FROM connections LIMIT 1");
+            String connectionIDQuery = "SELECT last_insert_id() FROM connections LIMIT 1";
+            if (isPostgres) {
+                connectionIDQuery = "SELECT lastval()";
+            }
+            PreparedStatement getConnIDStmt = myCon.prepareStatement(connectionIDQuery);
             rs = getConnIDStmt.executeQuery();
             if (rs.next()) {
                 returnValue = rs.getLong(1);
