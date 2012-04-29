@@ -46,7 +46,6 @@ public final class TrekServer extends Thread {
     protected static Vector players;
     public static Hashtable quadrants;
     protected static Timer tickTimer;
-    protected static Vector deletionTimers;
     protected static long startTime;
     protected static boolean serverShuttingDown = false;
     private static boolean teamPlayEnabled = false;
@@ -66,6 +65,7 @@ public final class TrekServer extends Thread {
     private static boolean autoSpawnThx = false;
 
     private static TrekPropertyReader tpr = TrekPropertyReader.getInstance();
+    private static TrekServer instance;
 
     public TrekServer() {
     }
@@ -89,7 +89,6 @@ public final class TrekServer extends Thread {
 
         // Initialize the quadrants hashtable.
         quadrants = new Hashtable();
-        deletionTimers = new Vector();
 
         Calendar cal = Calendar.getInstance();
         startTime = cal.getTimeInMillis();
@@ -114,6 +113,7 @@ public final class TrekServer extends Thread {
 
         // check to see if thx robot ship should be auto launched
         autoSpawnThx = Boolean.valueOf(tpr.getValue("thx.autoSpawn"));
+        instance = this;
     }
 
     /* (non-Javadoc)
@@ -132,8 +132,8 @@ public final class TrekServer extends Thread {
             }
 
             /*
-                * TODO: Move data into files, rather than in constructor.
-                */
+            * TODO: Move data into files, rather than in constructor.
+            */
             players = new Vector();
 
             TrekQuadrant quadrant = new TrekQuadrant(this);
@@ -371,8 +371,7 @@ public final class TrekServer extends Thread {
             quadrants.put("Delta Quadrant", quadrant);
 
             TrekLog.logMessage("Setting up Tick Timer...");
-            tickTimer = new Timer("TrekServer", true);
-            tickTimer.scheduleAtFixedRate(new TrekTickTimerTask(), 0, 250);
+            setTimerTickDuration(250);
 
             TrekLog.logMessage("Server is up and running.");
 
@@ -418,6 +417,15 @@ public final class TrekServer extends Thread {
             serverMon.shutdownConnections();
 
             while (players.size() != 0) {
+                ArrayList<TrekPlayer> deadThreads = new ArrayList<TrekPlayer>();
+                for (Object player : players){
+                    TrekPlayer playerThread = (TrekPlayer) player;
+                    if (playerThread.getState() == State.TERMINATED) {
+                        deadThreads.add(playerThread);
+                    }
+                }
+                players.removeAll(deadThreads);
+
                 TrekLog.logMessage("Waiting for all players threads to stop...");
                 Thread.sleep(10000);
             }
@@ -428,6 +436,14 @@ public final class TrekServer extends Thread {
         } catch (Exception e) {
             TrekLog.logException(e);
         }
+    }
+
+    protected static void setTimerTickDuration(int duration) {
+        if (tickTimer != null) {
+            tickTimer.cancel();
+        }
+        tickTimer = new Timer("TrekServer", true);
+        tickTimer.scheduleAtFixedRate(new TrekTickTimerTask(), 0, duration);
     }
 
     /**
@@ -1123,7 +1139,7 @@ public final class TrekServer extends Thread {
     }
 
     protected static TrekServer getInstance() {
-        return new TrekServer();
+        return instance;
     }
 
     protected static TrekShip getPlayerShipByScanLetter(String scanLetter) {
@@ -1512,19 +1528,6 @@ public final class TrekServer extends Thread {
         } finally {
             consoleCommand = "";
         }
-    }
-
-    protected static void addDeletionTimer(String thisShipName) {
-        TrekLog.logMessage("Adding a deletion timer for " + thisShipName);
-
-        Calendar cal = Calendar.getInstance();
-        Date deleteTime = cal.getTime();
-        deleteTime.setTime(cal.getTimeInMillis() + 900000);
-
-        TrekDeletionTimerTask deleter = new TrekDeletionTimerTask(thisShipName);
-        tickTimer.schedule(deleter, deleteTime);
-
-        deletionTimers.add(deleter);
     }
 
     public static String getUptime() {

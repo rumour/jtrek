@@ -2929,6 +2929,7 @@ public class TrekPlayer extends Thread {
     public void doAdmiralCommand(String admiralCommand) {
         if (admiralCommand.equals(""))
             return;
+
         if (admiralCommand.contains("create gold")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc == -1) {
@@ -2945,10 +2946,12 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.equalsIgnoreCase("create ship debris with gold")) {
             ship.currentQuadrant.addObject(new TrekShipDebris(ship, 100));
             return;
         }
+
         if (admiralCommand.equalsIgnoreCase("autofix")) {
             ShipQ adminShip = (ShipQ) ship;
             if (adminShip.autoFix) {
@@ -2960,6 +2963,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("show db data")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -2974,6 +2978,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         // show xyz [c]
         if (admiralCommand.contains("show xyz")) {
             int brackLoc = admiralCommand.indexOf("[");
@@ -2997,6 +3002,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("move to")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3012,6 +3018,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("change quad")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3048,6 +3055,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.equalsIgnoreCase("give all")) {
             ship.buoyTimeout = 0;
             ship.corbomite = true;
@@ -3062,11 +3070,13 @@ public class TrekPlayer extends Thread {
             ship.seekerTimeout = 0;
             return;
         }
+
         if (admiralCommand.contains("send msg:")) {
             String msgContents = admiralCommand.substring(admiralCommand.indexOf(":") + 1, admiralCommand.length());
             TrekServer.sendAnnouncement(msgContents, true);
             return;
         }
+
         if (admiralCommand.contains("change name")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3104,6 +3114,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("heal ship")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3125,6 +3136,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("energize ship")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3143,6 +3155,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("bring ship")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3159,6 +3172,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.equals("tractor beam")) {
             ShipQ admiralShip = (ShipQ) ship;
             if (admiralShip.beamTarget != null) {
@@ -3174,6 +3188,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         // TODO:possibly enhance command to get the bot name as well as class, thx currently defines it's name in the class though
         if (admiralCommand.contains("spawn bot")) {
             int brackLoc = admiralCommand.indexOf("[");
@@ -3223,6 +3238,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("kill ship")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3236,6 +3252,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.contains("save ship")) {
             int brackLoc = admiralCommand.indexOf("[");
             if (brackLoc != -1) {
@@ -3249,6 +3266,7 @@ public class TrekPlayer extends Thread {
             }
             return;
         }
+
         if (admiralCommand.equals("save all ships")) {
             for (int x = 0; x < 5; x++) {
                 TrekQuadrant quadrant = (TrekQuadrant) TrekServer.quadrants.get("Alpha Quadrant");
@@ -3600,6 +3618,23 @@ public class TrekPlayer extends Thread {
                 }
             } else {
                 hud.sendMessage("Poorly formed change class cmd, use: change class [class,shipLtr]");
+            }
+            return;
+        }
+
+        if (admiralCommand.contains("set tick")) {
+            int brackLoc = admiralCommand.indexOf("[");
+            if (brackLoc != -1) {
+                int closingBrackLoc = admiralCommand.indexOf("]");
+                if (closingBrackLoc != -1) {
+                    String tickStr = admiralCommand.substring(brackLoc + 1, closingBrackLoc);
+                    int tickTime = Integer.parseInt(tickStr);
+                    TrekServer.setTimerTickDuration(tickTime);
+                } else {
+                    hud.sendMessage("Poorly formed 'set tick' cmd, use: set tick [xxx] (xxx = tick time in ms)");
+                }
+            } else {
+                hud.sendMessage("Poorly formed 'set tick' cmd, use: set tick [xxx] (xxx = tick time in ms)");
             }
         }
     }
