@@ -2246,11 +2246,12 @@ public class TrekPlayer extends Thread {
 
             // If the server is full...
             if (TrekServer.players.size() >= 62) {
-                sendText("We're sorry.  The server is full.  Try again later.\r\n");
-                sendText("[Press enter to disconnect.]");
-                getBlockedInput(false, 60000, true);
-                state = WAIT_HSCLASS;
-                return;
+                TrekServer.clearDeadPlayerThreads();
+
+                if (TrekServer.players.size() >= 62) {
+                    sendText("We're sorry.  The server is full.  Try again later.\r\n");
+                    return;
+                }
             }
 
             int clientInput;
@@ -2556,7 +2557,6 @@ public class TrekPlayer extends Thread {
                                 } finally {
                                     task.cancel();
                                     timeToDie.cancel();
-                                    timeToDie = null;
                                 }
                             }
 
@@ -2583,7 +2583,6 @@ public class TrekPlayer extends Thread {
                                     } finally {
                                         task.cancel();
                                         timeToDie.cancel();
-                                        timeToDie = null;
                                     }
                                 }
                             }
@@ -2842,12 +2841,6 @@ public class TrekPlayer extends Thread {
                         }
                     }
                 }
-            } catch (java.net.SocketException se) {
-                TrekLog.logError(se.getMessage());
-                state = WAIT_SOCKETERROR;
-            } catch (java.io.IOException ioe) {
-                TrekLog.logError(ioe.getMessage());
-                state = WAIT_SOCKETERROR;
             } catch (Exception e) {
                 TrekLog.logException(e);
                 state = WAIT_SOCKETERROR;
@@ -3008,7 +3001,13 @@ public class TrekPlayer extends Thread {
             if (brackLoc != -1) {
                 String xyzShipStr = admiralCommand.substring(brackLoc + 1, brackLoc + 2);
                 TrekShip xyzShip = TrekServer.getPlayerShipByScanLetter(xyzShipStr);
-                if (xyzShip != null && xyzShip.currentQuadrant.name.equals(ship.currentQuadrant.name)) {
+                if (xyzShip != null) {
+                    if (!xyzShip.currentQuadrant.name.equals(ship.currentQuadrant.name)) {
+                        ship.currentQuadrant.removeShipByScanLetter(ship.scanLetter);
+                        ship.currentQuadrant = xyzShip.currentQuadrant;
+                        ship.currentQuadrant.addShip(ship);
+                    }
+
                     ship.point = new Trek3DPoint(xyzShip.point);
                 } else {
                     hud.sendMessage("Ship letter does not exist.");
