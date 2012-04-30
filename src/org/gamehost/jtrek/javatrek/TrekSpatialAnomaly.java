@@ -87,7 +87,7 @@ public class TrekSpatialAnomaly extends TrekWormhole {
             Random gen = new Random();
             activeCountdown = Math.abs(gen.nextInt() % 1200) + 1200;  // active time from 5 to 10 minutes
             counterStart = activeCountdown;
-            Timer recreateTimer = new Timer("SpatialAnomaly-" + currentQuadrant);
+            Timer recreateTimer = new Timer("SpatialAnomaly-" + currentQuadrant.name);
             recreateTimer.schedule(new TrekAnomalyTimer(this), regenTime);
             currentQuadrant.removeObjectByScanLetter(scanLetter);
             regenTime = Math.abs(gen.nextInt() % 900000) + 300000;  // from 5 to 20 minutes to respawn
