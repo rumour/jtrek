@@ -25,7 +25,6 @@ import org.gamehost.jtrek.javatrek.bot.BotPlayer;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.text.NumberFormat;
 import java.util.*;
@@ -1092,6 +1091,18 @@ public class TrekPlayer extends Thread {
                         command = 0;
                         inputstatenext = INPUT_MACROREMOVE;
                         break;
+                    case 43: // +; admiral - increase ship scanning range
+                        if (ship instanceof ShipQ) {
+                            ship.scanRange += 1000;
+                            hud.sendMessage("Scan range increased to " + ship.scanRange);
+                        }
+                        break;
+                    case 45: // -; admiral - decrease ship scanning range
+                        if (ship instanceof ShipQ) {
+                            ship.scanRange -= 1000;
+                            hud.sendMessage("Scan range decreased to " + ship.scanRange);
+                        }
+                        break;
                     case 46: // Dock or orbit '.'
                         ship.dock();
                         break;
@@ -1479,8 +1490,7 @@ public class TrekPlayer extends Thread {
                         } else {
                             sendText(TrekAnsi.clearRow(19, this));
                             inputstatenext = INPUT_NORMAL;
-                            // TODO: update the player password, based on the
-                            // passwordBuffer value
+                            // TODO: update the player password, based on the passwordBuffer value
                             if (quitAfterPassword) {
                                 doSave();
                             } else {
@@ -2245,11 +2255,13 @@ public class TrekPlayer extends Thread {
             }
 
             // If the server is full...
-            if (TrekServer.players.size() >= 62) {
+            if (TrekServer.players.size() > 62) {
                 TrekServer.clearDeadPlayerThreads();
 
-                if (TrekServer.players.size() >= 62) {
+                if (TrekServer.players.size() > 62) {
                     sendText("We're sorry.  The server is full.  Try again later.\r\n");
+                    socket.close();
+                    interrupt();
                     return;
                 }
             }
@@ -3213,21 +3225,9 @@ public class TrekPlayer extends Thread {
                             TrekLog.logException(mue);
                             hud.sendMessage("Failed to load new instance of bot class. MalformedURLException");
                         }
-                    } catch (ClassNotFoundException cnfe) {
-                        TrekLog.logException(cnfe);
-                        hud.sendMessage("Failed to spawn new bot. ClassNotFoundException");
-                    } catch (NoSuchMethodException nsme) {
-                        TrekLog.logException(nsme);
-                        hud.sendMessage("Failed to spawn new bot. NoSuchMethodException");
-                    } catch (IllegalAccessException iae) {
-                        TrekLog.logException(iae);
-                        hud.sendMessage("Failed to spawn new bot. IllegalAccessException");
-                    } catch (InstantiationException ie) {
-                        TrekLog.logException(ie);
-                        hud.sendMessage("Failed to spawn new bot. InstantiationException");
-                    } catch (InvocationTargetException ite) {
-                        TrekLog.logException(ite);
-                        hud.sendMessage("Failed to spawn new bot. InvocationTargetException");
+                    } catch (Exception e) {
+                        hud.sendMessage("Failed to spawn new bot. " + e.getClass().getName());
+                        TrekLog.logException(e);
                     }
                 } else {
                     hud.sendMessage("Poorly formed Bot Admiral command, use: spawn bot [classname]");
