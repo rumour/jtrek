@@ -1107,6 +1107,8 @@ public final class TrekServer extends Thread {
             return null;
         }
 
+        TrekServer.clearDeadPlayerThreads();
+
         // Remove all used scan letters from the array.
         for (Enumeration e = players.elements(); e.hasMoreElements(); ) {
             TrekPlayer player = (TrekPlayer) e.nextElement();
