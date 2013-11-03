@@ -141,7 +141,7 @@ public abstract class BotPlayer extends TrekBot {
         }
 
         dbPlayerID = TrekServer.botPlayerId;
-        botTeam = Math.abs(gen.nextInt() % 2) + 1;  // team 1 or 2 ... can be incorporated in team play also
+        botTeam = Math.abs(gen.nextInt() % 3) + 1;  // spawns as team 1, 2, or 3 ... can be incorporated in team play also
 
         doDebug = false;
 
