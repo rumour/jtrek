@@ -147,7 +147,7 @@ public class TrekPlanet extends TrekObject {
                 second = 0;
             }
 
-            totalAntiMatter++;
+            totalAntiMatter += 50;
 
             if (totalAntiMatter > 50000)
                 totalAntiMatter = 50000;
@@ -180,8 +180,9 @@ public class TrekPlanet extends TrekObject {
         }
 
         if (totalAntiMatter < thisAmount) {
+            int amountToReturn = totalAntiMatter;
             totalAntiMatter = 0;
-            return totalAntiMatter;
+            return amountToReturn;
         }
 
         totalAntiMatter -= thisAmount;
