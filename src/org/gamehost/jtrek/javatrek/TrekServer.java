@@ -1523,6 +1523,33 @@ public final class TrekServer extends Thread {
 
                 return;
             }
+
+            if (thisCommand.equalsIgnoreCase("gc")) {
+                TrekLog.logMessage("Requesting Garbage Collection");
+                TrekLog.logMessage("Before:");
+                TrekMemoryUsageReporter.logMemory();
+                System.gc();
+                System.runFinalization();
+                TrekLog.logMessage("After:");
+                TrekMemoryUsageReporter.logMemory();
+
+                return;
+            }
+
+            if (thisCommand.equalsIgnoreCase("show memory")) {
+                TrekLog.logMessage("Displaying Memory Usage");
+                TrekMemoryUsageReporter.logMemory();
+
+                return;
+            }
+
+            if (thisCommand.equalsIgnoreCase("show full memory")) {
+                TrekLog.logMessage("Displaying Memory and GC Status");
+                TrekMemoryUsageReporter.logMemory();
+                TrekMemoryUsageReporter.logMemoryBeans();
+
+                return;
+            }
         } catch (Exception e) {
             TrekLog.logException(e);
         } finally {

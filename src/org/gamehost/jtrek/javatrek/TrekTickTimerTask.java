@@ -22,6 +22,7 @@
 package org.gamehost.jtrek.javatrek;
 
 import java.util.Enumeration;
+import java.util.NoSuchElementException;
 import java.util.TimerTask;
 import java.util.Vector;
 
@@ -32,7 +33,7 @@ import java.util.Vector;
  */
 public class TrekTickTimerTask extends TimerTask {
     static int tickCount = 0;
-    static int totalSeconds = 0;
+    static long totalSeconds = 0;
 
     public TrekTickTimerTask() {
 
@@ -117,6 +118,8 @@ public class TrekTickTimerTask extends TimerTask {
                             team1.getConflicts(), false);
                 }
             }
+
+            TrekMemoryUsageReporter.logMemory();
         }
 
         if ((totalSeconds % TrekServer.getBotRespawnTime()) == 0) {
@@ -129,13 +132,19 @@ public class TrekTickTimerTask extends TimerTask {
             if (TrekServer.isThxEnabled()) {
                 TrekServer.launchBot("BotTHX");
             }
+
+            TrekMemoryUsageReporter.logMemoryBeans();
         }
 
         for (Enumeration e = TrekServer.players.elements(); e.hasMoreElements(); ) {
-            TrekPlayer activePlayer = (TrekPlayer) e.nextElement();
+            try {
+                TrekPlayer activePlayer = (TrekPlayer) e.nextElement();
 
-            if (activePlayer.state == TrekPlayer.WAIT_PLAYING) {
-                activePlayer.doSecondUpdate();
+                if (activePlayer.state == TrekPlayer.WAIT_PLAYING) {
+                    activePlayer.doSecondUpdate();
+                }
+            } catch (NoSuchElementException nsee) {
+                TrekLog.logError("NoSuchElementException occurred during player tick handling");
             }
         }
     }

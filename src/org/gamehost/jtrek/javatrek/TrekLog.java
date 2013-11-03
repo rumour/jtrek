@@ -22,6 +22,7 @@
 package org.gamehost.jtrek.javatrek;
 
 import java.io.*;
+import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,16 +68,10 @@ public final class TrekLog {
      * @param thisMessage The message to be logged.
      */
     public synchronized static void logDebug(String thisMessage) {
-        try {
-            if (!debug)
-                return;
+        if (!debug)
+            return;
 
-            System.out.println("DEBUG: " + thisMessage);
-            logOut.write("DEBUG: " + thisMessage + "\r\n");
-            logOut.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        logMessage("DEBUG: " + thisMessage);
     }
 
     /**
@@ -84,15 +79,8 @@ public final class TrekLog {
      *
      * @param thisError The error to be logged.
      */
-    protected synchronized static void logError(String thisError) {
-        try {
-            TrekLog.logMessage("ERROR: " + thisError);
-            logOut.write("ERROR: " + thisError + "\r\n");
-            logOut.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public synchronized static void logError(String thisError) {
+        logMessage("ERROR: " + thisError);
     }
 
     /**
@@ -101,15 +89,19 @@ public final class TrekLog {
      * @param thisException The exception to be logged.
      */
     public synchronized static void logException(Exception thisException) {
-        try {
-            thisException.printStackTrace();
+        thisException.printStackTrace();
 
-            StringWriter sWriter = new StringWriter();
-            thisException.printStackTrace(new PrintWriter(sWriter));
-            logMessage(sWriter.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        StringWriter sWriter = new StringWriter();
+        thisException.printStackTrace(new PrintWriter(sWriter));
+        logMessage(sWriter.toString());
+    }
+
+    public synchronized static void logMemory(String memoryLabel, MemoryUsage usage) {
+        logMessage("MEMORY: (" + memoryLabel + ")  Used: " + usage.getUsed() + " Max: " + usage.getMax());
+    }
+
+    public synchronized static void logMemory(String gcLabel, long collectionCount, long collectionTime) {
+        logMessage("MEMORY GC: (" + gcLabel + ") Count: " + collectionCount + " Time: " + collectionTime);
     }
 
     /**
