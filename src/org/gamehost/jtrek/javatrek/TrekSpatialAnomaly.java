@@ -31,14 +31,13 @@ import java.util.Vector;
  * User: Jay
  * Date: Feb 2, 2005
  * Time: 6:58:26 PM
- * To change this template use File | Settings | File Templates.
  */
 public class TrekSpatialAnomaly extends TrekWormhole {
     int regenTime = 300000; // 5 minutes in millis
     private int counterStart;
 
-    public TrekSpatialAnomaly(int x, int y, int z, String name, String scanletter) {
-        super(x, y, z, name, scanletter);
+    public TrekSpatialAnomaly(int x, int y, int z, String name, String scanLetter) {
+        super(x, y, z, name, scanLetter);
         targetQuadrant = "";
         activeCountdown = 180;
         counterStart = activeCountdown;
@@ -87,12 +86,11 @@ public class TrekSpatialAnomaly extends TrekWormhole {
             Random gen = new Random();
             activeCountdown = Math.abs(gen.nextInt() % 1200) + 1200;  // active time from 5 to 10 minutes
             counterStart = activeCountdown;
-            Timer recreateTimer = new Timer("SpatialAnomaly-" + currentQuadrant);
+            Timer recreateTimer = new Timer("SpatialAnomaly-" + currentQuadrant.name);
             recreateTimer.schedule(new TrekAnomalyTimer(this), regenTime);
             currentQuadrant.removeObjectByScanLetter(scanLetter);
             regenTime = Math.abs(gen.nextInt() % 900000) + 300000;  // from 5 to 20 minutes to respawn
         }
-
     }
 
     protected String getTargetQuadrant(TrekShip targetShip) {
@@ -106,5 +104,4 @@ public class TrekSpatialAnomaly extends TrekWormhole {
 
         return returnQuadrant;
     }
-
 }

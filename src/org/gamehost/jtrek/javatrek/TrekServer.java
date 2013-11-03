@@ -417,17 +417,10 @@ public final class TrekServer extends Thread {
             serverMon.shutdownConnections();
 
             while (players.size() != 0) {
-                ArrayList<TrekPlayer> deadThreads = new ArrayList<TrekPlayer>();
-                for (Object player : players){
-                    TrekPlayer playerThread = (TrekPlayer) player;
-                    if (playerThread.getState() == State.TERMINATED) {
-                        deadThreads.add(playerThread);
-                    }
-                }
-                players.removeAll(deadThreads);
+                clearDeadPlayerThreads();
 
                 TrekLog.logMessage("Waiting for all players threads to stop...");
-                Thread.sleep(10000);
+                Thread.sleep(1000);
             }
 
             TrekLog.logMessage("Server Shutdown complete.");
@@ -436,6 +429,17 @@ public final class TrekServer extends Thread {
         } catch (Exception e) {
             TrekLog.logException(e);
         }
+    }
+
+    protected static void clearDeadPlayerThreads() {
+        ArrayList<TrekPlayer> deadThreads = new ArrayList<TrekPlayer>();
+        for (Object player : players){
+            TrekPlayer playerThread = (TrekPlayer) player;
+            if (playerThread.getState() == State.TERMINATED) {
+                deadThreads.add(playerThread);
+            }
+        }
+        players.removeAll(deadThreads);
     }
 
     protected static void setTimerTickDuration(int duration) {
@@ -1102,6 +1106,8 @@ public final class TrekServer extends Thread {
             TrekLog.logMessage("Server is full.  Kick ass.");
             return null;
         }
+
+        TrekServer.clearDeadPlayerThreads();
 
         // Remove all used scan letters from the array.
         for (Enumeration e = players.elements(); e.hasMoreElements(); ) {

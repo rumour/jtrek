@@ -1092,6 +1092,18 @@ public class TrekPlayer extends Thread {
                         command = 0;
                         inputstatenext = INPUT_MACROREMOVE;
                         break;
+                    case 43: // +; admiral - increase ship scanning range
+                        if (ship instanceof ShipQ) {
+                            ship.scanRange += 1000;
+                            hud.sendMessage("Scan range increased to " + ship.scanRange);
+                        }
+                        break;
+                    case 45: // -; admiral - decrease ship scanning range
+                        if (ship instanceof ShipQ) {
+                            ship.scanRange -= 1000;
+                            hud.sendMessage("Scan range decreased to " + ship.scanRange);
+                        }
+                        break;
                     case 46: // Dock or orbit '.'
                         ship.dock();
                         break;
@@ -1479,8 +1491,7 @@ public class TrekPlayer extends Thread {
                         } else {
                             sendText(TrekAnsi.clearRow(19, this));
                             inputstatenext = INPUT_NORMAL;
-                            // TODO: update the player password, based on the
-                            // passwordBuffer value
+                            // TODO: update the player password, based on the passwordBuffer value
                             if (quitAfterPassword) {
                                 doSave();
                             } else {
@@ -1823,47 +1834,41 @@ public class TrekPlayer extends Thread {
     protected boolean doChoosePlayer() {
         state = WAIT_SPECIFYPLAYER;
         String input;
+        String playerChosen = "";
         String playerEntered;
         boolean inputDone = false;
         String password1, password2;
 
+        sendText("\r\n   Player: ");
+        // get the player name
         do {
-            sendText("\r\n   Player: ");
-            // get the player name
-            String playerChosen = "";
-
-            do {
-                //input = getCharacterInput(false, false,false);
-                input = getBlockedInput(true, 60000, false);
-                // If input is null, it's probably a socket error. Disconnect.
-                if (input == null)
+            //input = getCharacterInput(false, false,false);
+            input = getBlockedInput(true, 60000, false);
+            // If input is null, it's probably a socket error. Disconnect.
+            if (input == null)
+                return false;
+            switch (input.charAt(0)) {
+                case 3: // CTRL-C for abort.
                     return false;
-                switch (input.charAt(0)) {
-                    case 3: // CTRL-C for abort.
-                        return false;
-                    case 13: // Capture enter.
-                        inputDone = true;
-                        break;
-                    default: // Backspace and buffering.
-                        if (isValidEraseCharacter(input.charAt(0))) {
-                            if (playerChosen.length() > 0) {
-                                sendText(TrekAnsi.moveBackwards(1, this) + TrekAnsi.deleteCharacters(1, this));
-                                playerChosen = playerChosen.substring(0, playerChosen.length() - 1);
-                            }
-                        } else {
-                            sendText(input);
-                            playerChosen += input;
+                case 13: // Capture enter.
+                    inputDone = true;
+                    break;
+                default: // Backspace and buffering.
+                    if (isValidEraseCharacter(input.charAt(0))) {
+                        if (playerChosen.length() > 0) {
+                            sendText(TrekAnsi.moveBackwards(1, this) + TrekAnsi.deleteCharacters(1, this));
+                            playerChosen = playerChosen.substring(0, playerChosen.length() - 1);
                         }
-                        break;
-                }
-            } while (!inputDone);
+                    } else {
+                        sendText(input);
+                        playerChosen += input;
+                    }
+                    break;
+            }
+        }
+        while (!inputDone);
 
-            playerEntered = playerChosen;
-
-            if (!playerEntered.trim().isEmpty()) break;
-            inputDone = false;
-
-        } while (true);
+        playerEntered = playerChosen;
 
         // does the player exist?
         if (dbInt.doesPlayerExist(playerEntered) == 0) {
@@ -1879,7 +1884,7 @@ public class TrekPlayer extends Thread {
 
                     if (password1 == null)
                         return false;
-                    else if (password1.trim().equals(""))
+                    else if (password1.equals(""))
                         sendText("\r\nPassword cannot be blank!\r\n");
                     else
                         break;
@@ -1893,6 +1898,8 @@ public class TrekPlayer extends Thread {
 
                     if (password2 == null)
                         return false;
+                    else if (password2.equals(""))
+                        sendText("\r\nPasswords do not match!\r\n");
                     else
                         break;
                 } while (true);
@@ -2249,12 +2256,15 @@ public class TrekPlayer extends Thread {
             }
 
             // If the server is full...
-            if (TrekServer.players.size() >= 62) {
-                sendText("We're sorry.  The server is full.  Try again later.\r\n");
-                sendText("[Press enter to disconnect.]");
-                getBlockedInput(false, 60000, true);
-                state = WAIT_HSCLASS;
-                return;
+            if (TrekServer.players.size() > 62) {
+                TrekServer.clearDeadPlayerThreads();
+
+                if (TrekServer.players.size() > 62) {
+                    sendText("We're sorry.  The server is full.  Try again later.\r\n");
+                    socket.close();
+                    interrupt();
+                    return;
+                }
             }
 
             int clientInput;
@@ -2560,7 +2570,6 @@ public class TrekPlayer extends Thread {
                                 } finally {
                                     task.cancel();
                                     timeToDie.cancel();
-                                    timeToDie = null;
                                 }
                             }
 
@@ -2587,7 +2596,6 @@ public class TrekPlayer extends Thread {
                                     } finally {
                                         task.cancel();
                                         timeToDie.cancel();
-                                        timeToDie = null;
                                     }
                                 }
                             }
@@ -2846,12 +2854,6 @@ public class TrekPlayer extends Thread {
                         }
                     }
                 }
-            } catch (java.net.SocketException se) {
-                TrekLog.logError(se.getMessage());
-                state = WAIT_SOCKETERROR;
-            } catch (java.io.IOException ioe) {
-                TrekLog.logError(ioe.getMessage());
-                state = WAIT_SOCKETERROR;
             } catch (Exception e) {
                 TrekLog.logException(e);
                 state = WAIT_SOCKETERROR;
@@ -3012,7 +3014,13 @@ public class TrekPlayer extends Thread {
             if (brackLoc != -1) {
                 String xyzShipStr = admiralCommand.substring(brackLoc + 1, brackLoc + 2);
                 TrekShip xyzShip = TrekServer.getPlayerShipByScanLetter(xyzShipStr);
-                if (xyzShip != null && xyzShip.currentQuadrant.name.equals(ship.currentQuadrant.name)) {
+                if (xyzShip != null) {
+                    if (!xyzShip.currentQuadrant.name.equals(ship.currentQuadrant.name)) {
+                        ship.currentQuadrant.removeShipByScanLetter(ship.scanLetter);
+                        ship.currentQuadrant = xyzShip.currentQuadrant;
+                        ship.currentQuadrant.addShip(ship);
+                    }
+
                     ship.point = new Trek3DPoint(xyzShip.point);
                 } else {
                     hud.sendMessage("Ship letter does not exist.");
@@ -3151,7 +3159,6 @@ public class TrekPlayer extends Thread {
                     xyzShip.warpEnergy = xyzShip.maxWarpEnergy;
                     xyzShip.impulseEnergy = xyzShip.maxImpulseEnergy;
                     xyzShip.currentCrystalCount = xyzShip.maxCrystalStorage;
-                    xyzShip.antiMatter = 5000;
                 } else {
                     hud.sendMessage("Ship letter does not exist.");
                 }
@@ -3219,21 +3226,9 @@ public class TrekPlayer extends Thread {
                             TrekLog.logException(mue);
                             hud.sendMessage("Failed to load new instance of bot class. MalformedURLException");
                         }
-                    } catch (ClassNotFoundException cnfe) {
-                        TrekLog.logException(cnfe);
-                        hud.sendMessage("Failed to spawn new bot. ClassNotFoundException");
-                    } catch (NoSuchMethodException nsme) {
-                        TrekLog.logException(nsme);
-                        hud.sendMessage("Failed to spawn new bot. NoSuchMethodException");
-                    } catch (IllegalAccessException iae) {
-                        TrekLog.logException(iae);
-                        hud.sendMessage("Failed to spawn new bot. IllegalAccessException");
-                    } catch (InstantiationException ie) {
-                        TrekLog.logException(ie);
-                        hud.sendMessage("Failed to spawn new bot. InstantiationException");
-                    } catch (InvocationTargetException ite) {
-                        TrekLog.logException(ite);
-                        hud.sendMessage("Failed to spawn new bot. InvocationTargetException");
+                    } catch (Exception e) {
+                        hud.sendMessage("Failed to spawn new bot. " + e.getClass().getName());
+                        TrekLog.logException(e);
                     }
                 } else {
                     hud.sendMessage("Poorly formed Bot Admiral command, use: spawn bot [classname]");

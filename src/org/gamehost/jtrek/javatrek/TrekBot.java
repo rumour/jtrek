@@ -37,8 +37,8 @@ public abstract class TrekBot extends TrekPlayer {
     /**
      * An abstract class for Bot functionality.
      *
-     * @param serverIn
-     * @param shipNameIn
+     * @param serverIn - the trek server to attach the bot to
+     * @param shipNameIn - the name of the bot ship
      */
     public TrekBot(TrekServer serverIn, String shipNameIn) {
         try {
@@ -120,20 +120,19 @@ public abstract class TrekBot extends TrekPlayer {
             char[] commands = theMacro.toCharArray();
 
             TrekLog.logDebug(this.shipName + ": Running macro: " + new String(commands));
-            //System.out.println(this.shipName + ": Running macro: " + new String(commands).toString());
 
-            for (int m = 0; m < commands.length; m++) {
+            for (char command : commands) {
 
                 // If there is a backslash, then process the octal code.
-                if (Character.toString(commands[m]).equals("\\")) {
+                if (Character.toString(command).equals("\\")) {
                     octalCode = true;
                 }
 
                 if (octalCode) {
-                    if (!Character.toString(commands[m]).equals("\\")) {
+                    if (!Character.toString(command).equals("\\")) {
 
-                        if (commands[m] >= 48 && commands[m] <= 57 || commands[m] == 114) {
-                            this.actualOctalCode += Character.toString(commands[m]);
+                        if (command >= 48 && command <= 57 || command == 114) {
+                            this.actualOctalCode += Character.toString(command);
                             this.octalCount++;
                         } else {
                             actualOctalCode = "";
@@ -159,10 +158,10 @@ public abstract class TrekBot extends TrekPlayer {
                         actualOctalCode = "";
                     }
                 } else {
-                    TrekLog.logDebug("Not an octal. Command: " + commands[m]);
+                    TrekLog.logDebug("Not an octal. Command: " + command);
 
-                    if (commands[m] != 0) {
-                        doCommand(commands[m]);
+                    if (command != 0) {
+                        doCommand(command);
                         actualOctalCode = "";
                         this.octalCount = 0;
                         this.octalCode = false;
