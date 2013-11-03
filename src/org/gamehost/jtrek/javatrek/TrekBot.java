@@ -75,6 +75,13 @@ public abstract class TrekBot extends TrekPlayer {
                 if (state == TrekPlayer.WAIT_DEAD)
                     break;
 
+                // still seeing an occasional BotPlayer thread that is running, but doesn't exist in the quadrant
+                if (ship.currentQuadrant.getShipByScanLetter(ship.scanLetter) != ship) {
+                    Thread.sleep(250);
+                    if (ship.currentQuadrant.getShipByScanLetter(ship.scanLetter) != ship) {
+                        state = TrekPlayer.WAIT_DEAD;
+                    }
+                }
                 Thread.sleep(1);
             }
             while (true);
