@@ -1823,41 +1823,47 @@ public class TrekPlayer extends Thread {
     protected boolean doChoosePlayer() {
         state = WAIT_SPECIFYPLAYER;
         String input;
-        String playerChosen = "";
         String playerEntered;
         boolean inputDone = false;
         String password1, password2;
 
-        sendText("\r\n   Player: ");
-        // get the player name
         do {
-            //input = getCharacterInput(false, false,false);
-            input = getBlockedInput(true, 60000, false);
-            // If input is null, it's probably a socket error. Disconnect.
-            if (input == null)
-                return false;
-            switch (input.charAt(0)) {
-                case 3: // CTRL-C for abort.
-                    return false;
-                case 13: // Capture enter.
-                    inputDone = true;
-                    break;
-                default: // Backspace and buffering.
-                    if (isValidEraseCharacter(input.charAt(0))) {
-                        if (playerChosen.length() > 0) {
-                            sendText(TrekAnsi.moveBackwards(1, this) + TrekAnsi.deleteCharacters(1, this));
-                            playerChosen = playerChosen.substring(0, playerChosen.length() - 1);
-                        }
-                    } else {
-                        sendText(input);
-                        playerChosen += input;
-                    }
-                    break;
-            }
-        }
-        while (!inputDone);
+            sendText("\r\n   Player: ");
+            // get the player name
+            String playerChosen = "";
 
-        playerEntered = playerChosen;
+            do {
+                //input = getCharacterInput(false, false,false);
+                input = getBlockedInput(true, 60000, false);
+                // If input is null, it's probably a socket error. Disconnect.
+                if (input == null)
+                    return false;
+                switch (input.charAt(0)) {
+                    case 3: // CTRL-C for abort.
+                        return false;
+                    case 13: // Capture enter.
+                        inputDone = true;
+                        break;
+                    default: // Backspace and buffering.
+                        if (isValidEraseCharacter(input.charAt(0))) {
+                            if (playerChosen.length() > 0) {
+                                sendText(TrekAnsi.moveBackwards(1, this) + TrekAnsi.deleteCharacters(1, this));
+                                playerChosen = playerChosen.substring(0, playerChosen.length() - 1);
+                            }
+                        } else {
+                            sendText(input);
+                            playerChosen += input;
+                        }
+                        break;
+                }
+            } while (!inputDone);
+
+            playerEntered = playerChosen;
+
+            if (!playerEntered.trim().isEmpty()) break;
+            inputDone = false;
+
+        } while (true);
 
         // does the player exist?
         if (dbInt.doesPlayerExist(playerEntered) == 0) {
@@ -1873,7 +1879,7 @@ public class TrekPlayer extends Thread {
 
                     if (password1 == null)
                         return false;
-                    else if (password1.equals(""))
+                    else if (password1.trim().equals(""))
                         sendText("\r\nPassword cannot be blank!\r\n");
                     else
                         break;
@@ -1887,8 +1893,6 @@ public class TrekPlayer extends Thread {
 
                     if (password2 == null)
                         return false;
-                    else if (password2.equals(""))
-                        sendText("\r\nPasswords do not match!\r\n");
                     else
                         break;
                 } while (true);
@@ -3147,6 +3151,7 @@ public class TrekPlayer extends Thread {
                     xyzShip.warpEnergy = xyzShip.maxWarpEnergy;
                     xyzShip.impulseEnergy = xyzShip.maxImpulseEnergy;
                     xyzShip.currentCrystalCount = xyzShip.maxCrystalStorage;
+                    xyzShip.antiMatter = 5000;
                 } else {
                     hud.sendMessage("Ship letter does not exist.");
                 }
@@ -3244,7 +3249,7 @@ public class TrekPlayer extends Thread {
             if (brackLoc != -1) {
                 String shipStr = admiralCommand.substring(brackLoc + 1, brackLoc + 2);
                 TrekShip theShip = TrekServer.getPlayerShipByScanLetter(shipStr);
-                if (theShip != null && theShip.currentQuadrant.name.equals(ship.currentQuadrant.name)) {
+                if (theShip != null) { // && theShip.currentQuadrant.name.equals(ship.currentQuadrant.name)) {
                     theShip.parent.kill();
                 }
             } else {
@@ -3542,6 +3547,10 @@ public class TrekPlayer extends Thread {
                         TrekShip theShip = TrekServer.getPlayerShipByScanLetter(shipLtr);
                         if (theShip != null) {
                             theShip.parent.teamNumber = teamNum;
+                            if (theShip.parent instanceof BotPlayer) {
+                                BotPlayer theBot = (BotPlayer) theShip.parent;
+                                theBot.botTeam = teamNum;
+                            }
                         } else {
                             hud.sendMessage("Ship letter does not exist.");
                         }
@@ -3629,7 +3638,11 @@ public class TrekPlayer extends Thread {
                 if (closingBrackLoc != -1) {
                     String tickStr = admiralCommand.substring(brackLoc + 1, closingBrackLoc);
                     int tickTime = Integer.parseInt(tickStr);
-                    TrekServer.setTimerTickDuration(tickTime);
+                    if (tickTime > 0) {
+                        TrekServer.setTimerTickDuration(tickTime);
+                    } else {
+                        hud.sendMessage("Invalid tick value, must be greater than zero");
+                    }
                 } else {
                     hud.sendMessage("Poorly formed 'set tick' cmd, use: set tick [xxx] (xxx = tick time in ms)");
                 }
